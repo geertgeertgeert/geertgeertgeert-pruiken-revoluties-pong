@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Negen Dagen Koningin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#F3E9D2;
+    --ink:#2B1D0E;
+    --tudor:#8C2F39;
+    --gold:#C9A227;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    background:#000;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    -webkit-touch-callout:none;
+    user-select:none;
+  }
+  body{
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+  }
+  #stage{
+    width:100%;height:100%;
+    display:flex;align-items:center;justify-content:center;
+    background:#000;
+  }
+  #game{
+    position:relative;
+    width:min(100vw, calc(100dvh * 9 / 16));
+    height:min(100dvh, calc(100vw * 16 / 9));
+    background:var(--parchment);
+    overflow:hidden;
+    box-shadow:0 0 50px rgba(0,0,0,.7);
+    display:flex;flex-direction:column;
+  }
+
+  /* HUD */
+  #hud{
+    display:none;
+    align-items:center;justify-content:space-between;
+    padding:10px 16px;
+    border-bottom:2px solid var(--gold);
+    font-family:'IM Fell English',serif;
+    font-size:14px;
+    background:rgba(43,29,14,.05);
+    flex-shrink:0;
+    z-index:5;
+  }
+  #hud span{display:flex;align-items:center;gap:4px;}
+  #hud-form{font-size:20px;}
+
+  /* App / scenes */
+  #app{
+    flex:1;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    padding:18px 20px calc(16px + env(safe-area-inset-bottom));
+    position:relative;
+    overflow:hidden;
+    transition:opacity .4s ease;
+    opacity:1;
+  }
+  #app.fade-out{opacity:0;}
+  #app.dark{background:#000;}
+  #app.dark .story{color:var(--parchment);}
+  #app.dark .choice-btn{background:#000;color:var(--parchment);border-color:var(--gold);}
+  #app.dark .choice-btn:active{background:#1a1208;}
+
+  .narrator{
+    font-style:italic;color:var(--tudor);font-size:14px;
+    margin-bottom:10px;line-height:1.4;
+  }
+  .story{
+    font-size:16px;line-height:1.5;margin-bottom:14px;color:var(--ink);
+  }
+  .choices{
+    margin-top:auto;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .choice-btn{
+    min-height:56px;
+    border:2px solid var(--ink);
+    background:var(--parchment);
+    color:var(--ink);
+    border-radius:10px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    padding:8px 14px;
+    text-align:left;
+    display:flex;align-items:center;gap:8px;
+    cursor:pointer;
+    transition:transform .15s, background .15s;
+  }
+  .choice-btn:active{transform:scale(.97);background:#e8dcc0;}
+  .choice-btn.gold{border-color:var(--gold);color:var(--gold);font-family:'IM Fell English',serif;font-size:17px;justify-content:center;}
+  .choice-btn.locked{opacity:.55;border-style:dashed;}
+
+  /* Title / cover screens */
+  .title-wrap{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;gap:6px;
+  }
+  .title-crown{font-size:48px;}
+  .game-title{
+    font-family:'IM Fell English',serif;color:var(--gold);
+    font-size:30px;line-height:1.15;letter-spacing:1px;margin:8px 0 2px;
+  }
+  .game-subtitle{color:var(--parchment);font-size:15px;font-style:italic;margin:0;}
+  .game-tagline{color:var(--parchment);font-size:12px;opacity:.75;margin:6px 0 0;}
+
+  /* Transformation animation */
+  .transform-stage{position:relative;height:140px;margin:6px auto 4px;display:flex;align-items:center;justify-content:center;}
+  .flame{
+    position:absolute;font-size:60px;
+    animation:flicker .9s ease-in-out infinite alternate, flameFade .5s ease forwards;
+    animation-delay:0s, 1s;
+  }
+  .animal-reveal{
+    position:absolute;font-size:0;opacity:0;
+    animation:growReveal 1.1s ease forwards;
+    animation-delay:.9s;
+    filter:drop-shadow(0 0 16px var(--gold));
+  }
+  @keyframes flicker{from{transform:scale(1) rotate(-3deg);}to{transform:scale(1.12) rotate(3deg);}}
+  @keyframes flameFade{to{opacity:0;transform:scale(.6);}}
+  @keyframes growReveal{
+    0%{font-size:0;opacity:0;}
+    55%{font-size:0;opacity:0;}
+    75%{font-size:84px;opacity:1;}
+    100%{font-size:74px;opacity:1;}
+  }
+  .certificate{
+    opacity:0;text-align:center;font-family:'IM Fell English',serif;
+    animation:fadeInUp .6s ease forwards;animation-delay:1.5s;color:var(--parchment);
+  }
+  .certificate p{margin:3px 0;}
+  .certificate .small{font-size:12.5px;font-family:'Inter',sans-serif;color:var(--gold);font-style:italic;}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  #certChoices{transition:opacity .5s ease;margin-top:auto;}
+
+  /* Rewind */
+  .hourglass{
+    font-size:56px;text-align:center;margin:14px 0;
+    animation:spin 2.4s linear infinite;
+  }
+  @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+  /* Epilogue */
+  .epilogue-wrap{flex:1;display:flex;align-items:center;justify-content:center;}
+  .epilogue-text{
+    font-family:'IM Fell English',serif;font-style:italic;color:var(--parchment);
+    font-size:16.5px;line-height:1.6;text-align:center;
+  }
+
+  /* Search minigame (day 5) */
+  .search-grid{display:flex;gap:8px;margin:12px 0;}
+  .search-item{
+    flex:1;min-height:72px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    border:2px solid var(--ink);border-radius:10px;background:var(--parchment);
+    font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;color:var(--ink);
+    cursor:pointer;position:relative;
+  }
+  .search-item .si-icon{font-size:24px;}
+  .search-item.found{border-color:var(--gold);background:#efe2bd;}
+  .search-item.found::after{content:'✓';position:absolute;top:3px;right:6px;color:var(--gold);font-weight:700;}
+  #search-note{min-height:36px;font-size:13.5px;font-style:italic;color:var(--tudor);}
+
+  .toast{
+    position:absolute;left:50%;top:70px;
+    transform:translate(-50%,-10px);
+    background:var(--ink);color:var(--parchment);
+    padding:8px 16px;border-radius:20px;font-size:12.5px;
+    opacity:0;transition:opacity .3s, transform .3s;
+    z-index:50;pointer-events:none;white-space:nowrap;max-width:88%;
+    box-shadow:0 4px 10px rgba(0,0,0,.3);
+    text-align:center;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="game">
+    <div id="hud">
+      <span id="hud-day">Dag 1 van 9</span>
+      <span id="hud-wisdom">📚 0</span>
+      <span id="hud-form"></span>
+    </div>
+    <div id="app"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const formEmoji = {vos:'🦊', uil:'🦉', beer:'🐻', kat:'🐈'};
+  const formName  = {vos:'Vos', uil:'Uil', beer:'Beer', kat:'Kat'};
+
+  const state = {
+    day: 0,
+    bookWisdom: 0,
+    form: null,
+    testTally: {vos:0, uil:0, beer:0, kat:0}
+  };
+
+  let currentChoices = [];
+
+  const app = document.getElementById('app');
+  const game = document.getElementById('game');
+
+  function show(html, opts){
+    opts = opts || {};
+    app.classList.add('fade-out');
+    setTimeout(function(){
+      app.innerHTML = html;
+      app.classList.toggle('dark', !!opts.dark);
+      app.classList.remove('fade-out');
+    }, 400);
+  }
+
+  function sceneHTML(cfg){
+    return (
+      '<div class="narrator">' + cfg.narrator + '</div>' +
+      '<div class="story">' + cfg.story + '</div>' +
+      (cfg.extra || '') +
+      '<div class="choices">' +
+        cfg.choices.map(function(c, i){
+          return '<button class="choice-btn ' + (c.cls || '') + '" onclick="__ndk.pick(' + i + ')">' +
+            (c.icon ? c.icon + ' ' : '') + c.label + '</button>';
+        }).join('') +
+      '</div>'
+    );
+  }
+
+  function showToast(msg){
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    game.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add('show'); });
+    setTimeout(function(){
+      t.classList.remove('show');
+      setTimeout(function(){ t.remove(); }, 300);
+    }, 1700);
+  }
+
+  function gainWisdom(n){
+    state.bookWisdom = Math.min(10, state.bookWisdom + n);
+    updateHUD();
+  }
+
+  function setHudVisible(v){
+    document.getElementById('hud').style.display = v ? 'flex' : 'none';
+  }
+
+  function updateHUD(){
+    document.getElementById('hud-day').textContent = state.day ? ('Dag ' + state.day + ' van 9') : '';
+    document.getElementById('hud-wisdom').textContent = '📚 ' + state.bookWisdom;
+    document.getElementById('hud-form').textContent = state.form ? formEmoji[state.form] : '';
+  }
+
+  function pick(i){
+    const c = currentChoices[i];
+    if(!c) return;
+    if(c.locked){
+      showToast(c.lockedMsg || ('🔒 Vereist Boekenwijsheid 4 (jij hebt ' + state.bookWisdom + ')'));
+      return;
+    }
+    if(c.wisdom){
+      gainWisdom(c.wisdom);
+      showToast('+1 📚 Boekenwijsheid');
+    } else if(c.toast){
+      showToast(c.toast);
+    }
+    c.action();
+  }
+
+  window.__ndk = { pick: pick, tapItem: null };
+
+  // ---------- PROLOGUE ----------
+
+  function renderPrologue1(){
+    setHudVisible(false);
+    currentChoices = [
+      {label:'Doe de Eðian-test →', action:function(){ renderTest(0); }}
+    ];
+    show(sceneHTML({
+      narrator:'Voordat we ook maar één woord zeggen over koninginnen, moeten we iets belangrijkers vaststellen. Iets over jou.',
+      story:'In dit Engeland blijft niet iedereen mens. Sommigen veranderen in een dier — wij noemen hen Eðians. De rest heet Verities. En die zijn daar, eerlijk gezegd, niet blij mee.',
+      choices: currentChoices
+    }), {dark:true});
+  }
+
+  const testQuestions = [
+    {
+      text:'Het is middernacht en je hoort een geluid in de gang.',
+      answers:[
+        {label:'Sluip er stilletjes naartoe.', form:'vos'},
+        {label:'Klim ergens hoog en kijk van bovenaf.', form:'uil'},
+        {label:'Loop er recht op af.', form:'beer'},
+        {label:'Doe alsof je slaapt.', form:'kat'}
+      ]
+    },
+    {
+      text:'Je mag één ding meenemen naar een onbewoond eiland.',
+      answers:[
+        {label:'Iets om mee te ruilen — je vindt wel een uitweg.', form:'vos'},
+        {label:'Een boek. Kennis is nooit nutteloos.', form:'uil'},
+        {label:'Iets om mee te bouwen of te vechten.', form:'beer'},
+        {label:'Iets moois, alleen voor jezelf.', form:'kat'}
+      ]
+    },
+    {
+      text:'Iemand beledigt je in het openbaar.',
+      answers:[
+        {label:'Een gevatte opmerking terug. Glimlachend.', form:'vos'},
+        {label:'Je denkt na over waaróm ze dat zeiden.', form:'uil'},
+        {label:'Je kijkt ze recht aan en zegt het hardop terug.', form:'beer'},
+        {label:'Je haalt je schouders op en loopt weg.', form:'kat'}
+      ]
+    }
+  ];
+
+  function renderTest(qIndex){
+    setHudVisible(false);
+    const q = testQuestions[qIndex];
+    currentChoices = q.answers.map(function(a){
+      return {
+        label:a.label,
+        action:function(){
+          state.testTally[a.form]++;
+          if(qIndex < 2) renderTest(qIndex + 1);
+          else finishTest();
+        }
+      };
+    });
+    show(sceneHTML({
+      narrator:'Vraag ' + (qIndex + 1) + ' van 3. Geen foute antwoorden — alleen antwoorden die iets verraden.',
+      story:q.text,
+      choices: currentChoices
+    }), {dark:true});
+  }
+
+  function finishTest(){
+    const order = ['vos','uil','beer','kat'];
+    let best = order[0];
+    order.forEach(function(f){ if(state.testTally[f] > state.testTally[best]) best = f; });
+    state.form = best;
+    renderTransform();
+  }
+
+  function renderTransform(){
+    setHudVisible(false);
+    const emoji = formEmoji[state.form];
+    const name = formName[state.form];
+    currentChoices = [
+      {label:'Verder', action: renderRewind}
+    ];
+    show(
+      '<div class="narrator">Even geduld. Er komt vuur aan te pas.</div>' +
+      '<div class="transform-stage">' +
+        '<div class="flame">🔥</div>' +
+        '<div class="animal-reveal">' + emoji + '</div>' +
+      '</div>' +
+      '<div class="certificate">' +
+        '<p>Gefeliciteerd. Jij bent een <strong>' + name + '</strong>.</p>' +
+        '<p class="small">Dit wordt nog relevant. Vertrouw ons.</p>' +
+      '</div>' +
+      '<div class="choices" id="certChoices" style="opacity:0;">' +
+        '<button class="choice-btn gold" onclick="__ndk.pick(0)">Verder</button>' +
+      '</div>',
+      {dark:true}
+    );
+    setTimeout(function(){
+      const c = document.getElementById('certChoices');
+      if(c) c.style.opacity = 1;
+    }, 1900);
+  }
+
+  function renderRewind(){
+    setHudVisible(false);
+    currentChoices = [{label:'⏳ Naar het begin', action: renderTitle}];
+    show(
+      '<div class="narrator">Zo. Nu je weet wat je bent, kunnen we terug naar het begin.</div>' +
+      '<div class="story">Engeland, 1553. Een meisje met te veel boeken en te weinig keus.</div>' +
+      '<div class="hourglass">⏳</div>' +
+      '<div class="choices"><button class="choice-btn gold" onclick="__ndk.pick(0)">⏳ Naar het begin</button></div>',
+      {dark:true}
+    );
+  }
+
+  function renderTitle(){
+    setHudVisible(false);
+    currentChoices = [{label:'Begin (wat kan er misgaan?)', action: renderDay1}];
+    show(
+      '<div class="title-wrap">' +
+        '<div class="title-crown">👑</div>' +
+        '<h1 class="game-title">NEGEN DAGEN<br>KONINGIN</h1>' +
+        '<p class="game-subtitle">naar <em>Lang leve Jane</em></p>' +
+      '</div>' +
+      '<div class="choices">' +
+        '<button class="choice-btn gold" onclick="__ndk.pick(0)">Begin (wat kan er misgaan?)</button>' +
+      '</div>',
+      {dark:true}
+    );
+  }
+
+  // ---------- INSTINCT MOMENTS ----------
+
+  const instinctMoments = {
+    3: {
+      vos:  {icon:'🦊', label:'Ruik dat er meer schuilt dan hoeven.', toast:'Typisch een vos.'},
+      uil:  {icon:'🦉', label:'Zie in één oogopslag: dit is meer dan een vloek.', toast:'Typisch een uil.'},
+      beer: {icon:'🐻', label:'Stap recht op het paard af, zonder angst.', toast:'Typisch een beer.'},
+      kat:  {icon:'🐈', label:'Bestudeer hem met samengeknepen ogen. Zeg niets.', toast:'Typisch een kat.'}
+    },
+    5: {
+      vos:  {icon:'🦊', label:'Ruik het gif voordat je hersenen het toegeven.', toast:'Vossenneuzen liegen niet.'},
+      uil:  {icon:'🦉', label:'Je zag het al bij de eerste hoest.', toast:'Uilenogen missen niets.'},
+      beer: {icon:'🐻', label:'Wil de beker uit Dudleys handen slaan.', toast:'Rustig, beer. Nog niet.'},
+      kat:  {icon:'🐈', label:'Wist het allang. Katten weten alles het eerst.', toast:'Arrogant. Maar correct.'}
+    },
+    8: {
+      vos:  {icon:'🦊', label:'Herken het kriebelen — vossen kennen dat gevoel van—', toast:'Nee. Nog niet. Lees het boek.'},
+      uil:  {icon:'🦉', label:'Herken het meteen. Uilen zien altijd—', toast:'Nee. Nog niet. Lees het boek.'},
+      beer: {icon:'🐻', label:'Voel het kriebelen ook. Beren noemen dat—', toast:'Nee. Nog niet. Lees het boek.'},
+      kat:  {icon:'🐈', label:'Weet precies wat dat kriebelen betekent, nietwaar?', toast:'Nee. Nog niet. Lees het boek.'}
+    }
+  };
+
+  // ---------- DAG 1-9 ----------
+
+  function renderDay1(){
+    state.day = 1;
+    setHudVisible(true);
+    updateHUD();
+    currentChoices = [
+      {label:'Protesteer luidkeels bij je moeder', action: renderDay2},
+      {label:'📖 Verstop een boek in je mouw voor morgen', wisdom:1, action: renderDay2},
+      {label:'Verstop jezelf tussen de planken van de bibliotheek', action: renderDay2}
+    ];
+    show(sceneHTML({
+      narrator:'Dag één. Nog helemaal niks aan de hand. Geniet ervan zolang het duurt.',
+      story:'Jane Grey, zestien, leest op dit moment drie boeken tegelijk. Dan komt het nieuws: morgen trouwt ze. Met een vreemde. Een zekere Gifford Dudley.',
+      choices: currentChoices
+    }));
+  }
+
+  function renderDay2(){
+    state.day = 2;
+    updateHUD();
+    currentChoices = [
+      {label:'🪶 Volg hem in het geheim', action: renderDay3},
+      {label:'Zoek in de bibliotheek naar Eðian-vloeken', wisdom:1, action: renderDay3}
+    ];
+    show(sceneHTML({
+      narrator:'De bruiloft is voorbij. Voor alle duidelijkheid: niemand droeg een paardenmasker. Nog niet.',
+      story:'Gifford — "noem me maar G" — is knap, beleefd, en verdwijnt elke ochtend vóór zonsopgang. Zonder uitleg. Janes boekenneus jeukt vreselijk.',
+      choices: currentChoices
+    }));
+  }
+
+  function renderDay3(){
+    state.day = 3;
+    updateHUD();
+    const im = instinctMoments[3][state.form];
+    currentChoices = [
+      {label:'Lach hardop — regel of geen regel', action: renderDay4},
+      {label:'Doe alsof er niks aan de hand is, zoals een echte lady', action: renderDay4},
+      {icon:im.icon, label:im.label, toast:im.toast, action: renderDay4}
+    ];
+    show(sceneHTML({
+      narrator:'Daar is-ie dan. Het moment waarop wij normaal een dramatische stilte laten vallen.',
+      story:'Bij het eerste ochtendlicht verandert G in... 🐴 een kastanjebruin paard. Er blijkt zelfs een huwelijksregel te bestaan: geen paardengrappen. Jane heeft er al twaalf klaarliggen.',
+      choices: currentChoices
+    }));
+  }
+
+  function renderDay4(){
+    state.day = 4;
+    updateHUD();
+    currentChoices = [
+      {label:'Vraag de hofartsen naar zijn toestand', action: renderDay5},
+      {label:'Let liever op wíe er rond zijn bed hangt', action: renderDay5},
+      {label:'📖 Raadpleeg een medisch traktaat uit de hofbibliotheek', wisdom:1, action: renderDay5}
+    ];
+    show(sceneHTML({
+      narrator:'Even iets minder grappigs. Nog steeds grappig, maar minder.',
+      story:'Aan het hof hoest koning Edward — Janes neef en beste vriend — al weken. Het wordt erger, niet beter. Jane besluit zelf te gaan kijken.',
+      choices: currentChoices
+    }));
+  }
+
+  const searchNotes = {
+    wine:'Zoetig. Te zoetig voor gewone wijn.',
+    dudley:'Hij glimlacht te veel voor iemand wiens koning ziek is.',
+    herb:'Een geur die je ergens van herkent. Uit een boek. Over vergif.'
+  };
+  let foundItems = new Set();
+
+  function renderDay5(){
+    state.day = 5;
+    updateHUD();
+    foundItems = new Set();
+    window.__ndk.tapItem = tapItem;
+    show(
+      '<div class="narrator">Iets in de troonzaal klopt niet. Jouw neus — of ogen, of instinct — voelt het al.</div>' +
+      '<div class="story">🧪 Tik op wat vreemd aanvoelt.</div>' +
+      '<div class="search-grid">' +
+        '<button class="search-item" id="item-wine" onclick="__ndk.tapItem(\'wine\')"><span class="si-icon">🍷</span><span>Wijnbeker</span></button>' +
+        '<button class="search-item" id="item-dudley" onclick="__ndk.tapItem(\'dudley\')"><span class="si-icon">🧑‍⚖️</span><span>Lord Dudley</span></button>' +
+        '<button class="search-item" id="item-herb" onclick="__ndk.tapItem(\'herb\')"><span class="si-icon">🌿</span><span>Kruidengeur</span></button>' +
+      '</div>' +
+      '<div id="search-note"></div>' +
+      '<div class="choices" id="search-continue" style="display:none;">' +
+        '<button class="choice-btn" onclick="__ndk.pick(0)">Verder</button>' +
+      '</div>'
+    );
+    currentChoices = [{label:'Verder', action: renderDay5b}];
+  }
+
+  function tapItem(key){
+    if(foundItems.has(key)) return;
+    foundItems.add(key);
+    document.getElementById('item-' + key).classList.add('found');
+    document.getElementById('search-note').textContent = searchNotes[key];
+    if(foundItems.size === 3){
+      document.getElementById('search-continue').style.display = 'flex';
+    }
+  }
+
+  function renderDay5b(){
+    const im = instinctMoments[5][state.form];
+    currentChoices = [
+      {label:'Trek voorzichtig een conclusie', action: renderDay6},
+      {icon:im.icon, label:im.label, toast:im.toast, action: renderDay6}
+    ];
+    show(sceneHTML({
+      narrator:'Even iets dat niets met boeken te maken heeft.',
+      story:'Iets in jou reageert instinctief op wat je net zag in de troonzaal.',
+      choices: currentChoices
+    }));
+  }
+
+  function renderDay6(){
+    state.day = 6;
+    updateHUD();
+    currentChoices = [
+      {label:'Weiger. Beleefd.', toast:'Het mocht niet baten.', action: renderDay7},
+      {label:'Weiger. Luid en dramatisch.', toast:'Het mocht niet baten.', action: renderDay7},
+      {label:'📖 Citeer een staatsrechtelijk boek over troonopvolging', wisdom:1, action: renderDay7}
+    ];
+    show(sceneHTML({
+      narrator:'Dit is geen ziekte. Dit is gif. Maar goed — dat wisten je ingewanden al.',
+      story:'Edward verandert de troonopvolging. Niet Mary — die liever Eðians verbrandt dan begrijpt, ja ook jou, lezer — maar Jane wordt zijn erfgenaam.',
+      choices: currentChoices
+    }));
+  }
+
+  function renderDay7(){
+    state.day = 7;
+    updateHUD();
+    const unlocked = state.bookWisdom >= 4;
+    currentChoices = [
+      {label:'👑 Accepteer de kroon, verbijsterd', action: renderDay8},
+      unlocked
+        ? {label:'Doorzie dat Lord Dudley aan de touwtjes trekt', toast:'Al die boeken bleken ergens goed voor.', action: renderDay8}
+        : {label:'🔒 Doorzie Dudleys spel (vereist Boekenwijsheid 4)', locked:true, cls:'locked'}
+    ];
+    show(sceneHTML({
+      narrator:'Sorry. Wij zijn vertellers, geen scenarioschrijvers met een geweten.',
+      story:'Edward wordt dood verklaard — of niet? Wij zeggen niks. Jane wordt gekroond, met tegenzin en een groeiend vermoeden over Lord Dudley.',
+      choices: currentChoices
+    }));
+  }
+
+  function renderDay8(){
+    state.day = 8;
+    updateHUD();
+    const im = instinctMoments[8][state.form];
+    currentChoices = [
+      {label:'Negeer het kriebelen, er is nu geen tijd voor', action: renderDay9a},
+      {icon:im.icon, label:im.label, toast:im.toast, action: renderDay9a}
+    ];
+    show(sceneHTML({
+      narrator:'Nu wordt het menens. Wij vinden het zelf ook spannend, eerlijk gezegd.',
+      story:'Mary verzamelt een leger. Jane voelt iets vreemds — er kriebelt iets onder haar huid. Wat dat is? Daar zeggen we niets over.',
+      choices: currentChoices
+    }));
+  }
+
+  function renderDay9a(){
+    state.day = 9;
+    updateHUD();
+    currentChoices = [{label:'...', action: renderDay9b}];
+    show(sceneHTML({
+      narrator:'En hier, lezer, wordt het menens.',
+      story:'Marys troepen bestormen Londen. Jane wordt gearresteerd en weggevoerd naar de Tower. De deur valt in het slot.',
+      choices: currentChoices
+    }));
+  }
+
+  function renderDay9b(){
+    setHudVisible(false);
+    currentChoices = [{label:'Verder', action: renderEnd}];
+    show(
+      '<div class="epilogue-wrap"><div class="epilogue-text">In de geschiedenisboeken wordt Jane Grey nu onthoofd. Maar wij, uw vertellers, vonden dat ze een beter verhaal verdiende. Wat er écht gebeurde met Jane, met G, met een koning die misschien niet zo dood is als iedereen denkt — en welke vorm er onder Janes huid kriebelde...</div></div>' +
+      '<div class="choices"><button class="choice-btn gold" onclick="__ndk.pick(0)">Verder</button></div>',
+      {dark:true}
+    );
+  }
+
+  function renderEnd(){
+    setHudVisible(false);
+    currentChoices = [
+      {label:'Vraag ernaar in de bibliotheek 📚', action:function(){ showToast('Goed plan. De bibliothecaresse zal trots zijn.'); }},
+      {label:'Opnieuw spelen (word een ander dier)', action: resetGame}
+    ];
+    show(
+      '<div class="title-wrap">' +
+        '<div class="title-crown">📖</div>' +
+        '<h1 class="game-title">LANG LEVE<br>JANE</h1>' +
+        '<p class="game-subtitle">Cynthia Hand, Brodi Ashton &amp; Jodi Meadows</p>' +
+        '<p class="game-tagline">Het verhaal dat wij niet mochten afmaken.</p>' +
+      '</div>' +
+      '<div class="choices">' +
+        '<button class="choice-btn gold" onclick="__ndk.pick(0)">Vraag ernaar in de bibliotheek 📚</button>' +
+        '<button class="choice-btn" onclick="__ndk.pick(1)">Opnieuw spelen (word een ander dier)</button>' +
+      '</div>',
+      {dark:true}
+    );
+  }
+
+  function resetGame(){
+    state.day = 0;
+    state.bookWisdom = 0;
+    state.form = null;
+    state.testTally = {vos:0, uil:0, beer:0, kat:0};
+    renderPrologue1();
+  }
+
+  renderPrologue1();
+})();
+</script>
+</body>
+</html>
