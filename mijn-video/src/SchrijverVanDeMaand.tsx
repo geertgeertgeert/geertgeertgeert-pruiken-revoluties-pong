@@ -1,9 +1,11 @@
 import { useMemo } from "react";
 import {
   AbsoluteFill,
+  Img,
   Sequence,
   interpolate,
   spring,
+  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
@@ -424,10 +426,41 @@ const Outro: React.FC = () => {
   const opacity = enter * exit;
 
   const lineWidth = interpolate(
-    spring({ frame: frame - 8, fps, config: { damping: 200 } }),
+    spring({ frame: frame - 30, fps, config: { damping: 200 } }),
     [0, 1],
     [0, 260],
   );
+
+  const portraitSpring = spring({
+    frame,
+    fps,
+    config: { damping: 14, stiffness: 120, mass: 0.9 },
+  });
+  const portraitScale = interpolate(portraitSpring, [0, 1], [0.6, 1]);
+  const portraitBlur = interpolate(frame, [0, 22], [18, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const ringDash = interpolate(portraitSpring, [0, 1], [0, 754]);
+
+  const nameOpacity = interpolate(frame, [12, 28], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const nameY = interpolate(frame, [12, 28], [24, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  const ctaOpacity = interpolate(frame, [46, 64], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  const creditOpacity = interpolate(frame, [60, 78], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   return (
     <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
@@ -437,47 +470,118 @@ const Outro: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 28,
+          gap: 24,
           padding: "0 60px",
           textAlign: "center",
         }}
       >
         <div
           style={{
-            fontFamily: serifFont,
-            fontSize: 88,
-            color: CREAM,
+            position: "relative",
+            width: 260,
+            height: 260,
+            transform: `scale(${portraitScale})`,
           }}
         >
-          {NAME}
+          <svg
+            width={260}
+            height={260}
+            style={{ position: "absolute", inset: 0 }}
+          >
+            <circle
+              cx={130}
+              cy={130}
+              r={120}
+              fill="none"
+              stroke={GOLD}
+              strokeWidth={3}
+              strokeDasharray={754}
+              strokeDashoffset={754 - ringDash}
+              transform="rotate(-90 130 130)"
+            />
+          </svg>
+          <div
+            style={{
+              position: "absolute",
+              inset: 10,
+              borderRadius: "50%",
+              overflow: "hidden",
+              filter: `blur(${portraitBlur}px)`,
+            }}
+          >
+            <Img
+              src={staticFile("hans-hagen.png")}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          </div>
         </div>
+
         <div
           style={{
-            width: lineWidth,
-            height: 2,
-            background: GOLD,
-          }}
-        />
-        <div
-          style={{
-            fontFamily: sansFont,
-            fontSize: 26,
-            letterSpacing: 5,
-            color: GOLD,
-            textTransform: "uppercase",
+            opacity: nameOpacity,
+            transform: `translateY(${nameY}px)`,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 24,
           }}
         >
-          Schrijver van de maand &middot; Juli
+          <div
+            style={{
+              fontFamily: serifFont,
+              fontSize: 76,
+              color: CREAM,
+            }}
+          >
+            {NAME}
+          </div>
+          <div
+            style={{
+              width: lineWidth,
+              height: 2,
+              background: GOLD,
+            }}
+          />
+          <div
+            style={{
+              fontFamily: sansFont,
+              fontSize: 24,
+              letterSpacing: 5,
+              color: GOLD,
+              textTransform: "uppercase",
+            }}
+          >
+            Schrijver van de maand &middot; Juli
+          </div>
         </div>
+
         <div
           style={{
-            marginTop: 40,
+            opacity: ctaOpacity,
+            marginTop: 32,
             fontFamily: sansFont,
-            fontSize: 30,
+            fontSize: 28,
             color: CREAM_DIM,
           }}
         >
           Volg {HANDLE} voor het volledige interview
+        </div>
+
+        <div
+          style={{
+            opacity: creditOpacity * 0.5,
+            marginTop: 18,
+            fontFamily: sansFont,
+            fontSize: 16,
+            letterSpacing: 1,
+            color: CREAM_DIM,
+          }}
+        >
+          Foto: Renske Derkx
         </div>
       </div>
     </AbsoluteFill>
@@ -503,11 +607,11 @@ export const SchrijverVanDeMaand: React.FC = () => {
         <Teaser />
       </Sequence>
 
-      <Sequence from={270} durationInFrames={240}>
+      <Sequence from={270} durationInFrames={190}>
         <NameReveal />
       </Sequence>
 
-      <Sequence from={510} durationInFrames={90}>
+      <Sequence from={460} durationInFrames={140}>
         <Outro />
       </Sequence>
     </AbsoluteFill>
