@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   AbsoluteFill,
-  Img,
   Sequence,
+  continueRender,
+  delayRender,
   interpolate,
   spring,
   staticFile,
@@ -411,6 +412,82 @@ const NameReveal: React.FC = () => {
   );
 };
 
+// ---------- Pixel-by-pixel photo reveal ----------
+
+const PHOTO_SRC = "hans-hagen.png";
+const PHOTO_NATURAL_WIDTH = 408;
+const PHOTO_NATURAL_HEIGHT = 500;
+const PANEL_WIDTH = 640;
+const PANEL_HEIGHT = Math.round(
+  (PANEL_WIDTH * PHOTO_NATURAL_HEIGHT) / PHOTO_NATURAL_WIDTH,
+);
+
+// Mimics a "guess the picture" reveal: the block grid gets finer in jumps.
+const REVEAL_STEPS = [4, 6, 9, 14, 21, 32, 48, 72, 108, 162, 260];
+const STEP_HOLD_FRAMES = 7;
+
+const PixelReveal: React.FC<{ frame: number; width: number; height: number }> = ({
+  frame,
+  width,
+  height,
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [handle] = useState(() => delayRender("Loading Hans Hagen portret"));
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = staticFile(PHOTO_SRC);
+    img.onload = () => {
+      setImage(img);
+      continueRender(handle);
+    };
+    img.onerror = () => continueRender(handle);
+  }, [handle]);
+
+  const stepIndex = Math.min(
+    REVEAL_STEPS.length - 1,
+    Math.floor(frame / STEP_HOLD_FRAMES),
+  );
+  const blocks = REVEAL_STEPS[stepIndex];
+
+  useLayoutEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !image) {
+      return;
+    }
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return;
+    }
+
+    const cols = blocks;
+    const rows = Math.max(1, Math.round((blocks * height) / width));
+
+    const tiny = document.createElement("canvas");
+    tiny.width = cols;
+    tiny.height = rows;
+    const tinyCtx = tiny.getContext("2d");
+    if (!tinyCtx) {
+      return;
+    }
+    tinyCtx.drawImage(image, 0, 0, cols, rows);
+
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(tiny, 0, 0, cols, rows, 0, 0, width, height);
+  }, [image, blocks, width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={width}
+      height={height}
+      style={{ width, height, display: "block" }}
+    />
+  );
+};
+
 // ---------- Outro ----------
 
 const Outro: React.FC = () => {
@@ -418,46 +495,45 @@ const Outro: React.FC = () => {
   const { fps, durationInFrames } = useVideoConfig();
 
   const enter = spring({ frame, fps, config: { damping: 200 } });
-  const exitStart = durationInFrames - 22;
+  const exitStart = durationInFrames - 16;
   const exit = interpolate(frame, [exitStart, durationInFrames], [1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
   const opacity = enter * exit;
 
-  const lineWidth = interpolate(
-    spring({ frame: frame - 30, fps, config: { damping: 200 } }),
+  const panelScale = interpolate(
+    spring({ frame, fps, config: { damping: 16, stiffness: 110, mass: 0.9 } }),
     [0, 1],
-    [0, 260],
+    [0.9, 1],
   );
 
-  const portraitSpring = spring({
-    frame,
-    fps,
-    config: { damping: 14, stiffness: 120, mass: 0.9 },
-  });
-  const portraitScale = interpolate(portraitSpring, [0, 1], [0.6, 1]);
-  const portraitBlur = interpolate(frame, [0, 22], [18, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const ringDash = interpolate(portraitSpring, [0, 1], [0, 754]);
+  const lineWidth = interpolate(
+    spring({ frame: frame - 78, fps, config: { damping: 200 } }),
+    [0, 1],
+    [0, 220],
+  );
 
-  const nameOpacity = interpolate(frame, [12, 28], [0, 1], {
+  const nameOpacity = interpolate(frame, [58, 76], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const nameY = interpolate(frame, [12, 28], [24, 0], {
+  const nameY = interpolate(frame, [58, 76], [22, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  const ctaOpacity = interpolate(frame, [46, 64], [0, 1], {
+  const tagOpacity = interpolate(frame, [76, 94], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  const creditOpacity = interpolate(frame, [60, 78], [0, 1], {
+  const ctaOpacity = interpolate(frame, [92, 110], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  const creditOpacity = interpolate(frame, [104, 120], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -470,53 +546,29 @@ const Outro: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 24,
-          padding: "0 60px",
+          gap: 26,
+          padding: "0 40px",
           textAlign: "center",
         }}
       >
         <div
           style={{
-            position: "relative",
-            width: 260,
-            height: 260,
-            transform: `scale(${portraitScale})`,
+            transform: `scale(${panelScale})`,
+            padding: 10,
+            border: `2px solid ${GOLD}`,
+            borderRadius: 18,
+            boxShadow: "0 30px 70px rgba(0,0,0,0.55)",
           }}
         >
-          <svg
-            width={260}
-            height={260}
-            style={{ position: "absolute", inset: 0 }}
-          >
-            <circle
-              cx={130}
-              cy={130}
-              r={120}
-              fill="none"
-              stroke={GOLD}
-              strokeWidth={3}
-              strokeDasharray={754}
-              strokeDashoffset={754 - ringDash}
-              transform="rotate(-90 130 130)"
-            />
-          </svg>
           <div
             style={{
-              position: "absolute",
-              inset: 10,
-              borderRadius: "50%",
+              width: PANEL_WIDTH,
+              height: PANEL_HEIGHT,
+              borderRadius: 12,
               overflow: "hidden",
-              filter: `blur(${portraitBlur}px)`,
             }}
           >
-            <Img
-              src={staticFile("hans-hagen.png")}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
+            <PixelReveal frame={frame} width={PANEL_WIDTH} height={PANEL_HEIGHT} />
           </div>
         </div>
 
@@ -527,13 +579,13 @@ const Outro: React.FC = () => {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 24,
+            gap: 20,
           }}
         >
           <div
             style={{
               fontFamily: serifFont,
-              fontSize: 76,
+              fontSize: 72,
               color: CREAM,
             }}
           >
@@ -546,25 +598,27 @@ const Outro: React.FC = () => {
               background: GOLD,
             }}
           />
-          <div
-            style={{
-              fontFamily: sansFont,
-              fontSize: 24,
-              letterSpacing: 5,
-              color: GOLD,
-              textTransform: "uppercase",
-            }}
-          >
-            Schrijver van de maand &middot; Juli
-          </div>
+        </div>
+
+        <div
+          style={{
+            opacity: tagOpacity,
+            fontFamily: sansFont,
+            fontSize: 24,
+            letterSpacing: 5,
+            color: GOLD,
+            textTransform: "uppercase",
+          }}
+        >
+          Schrijver van de maand &middot; Juli
         </div>
 
         <div
           style={{
             opacity: ctaOpacity,
-            marginTop: 32,
+            marginTop: 8,
             fontFamily: sansFont,
-            fontSize: 28,
+            fontSize: 26,
             color: CREAM_DIM,
           }}
         >
@@ -574,9 +628,8 @@ const Outro: React.FC = () => {
         <div
           style={{
             opacity: creditOpacity * 0.5,
-            marginTop: 18,
             fontFamily: sansFont,
-            fontSize: 16,
+            fontSize: 15,
             letterSpacing: 1,
             color: CREAM_DIM,
           }}
