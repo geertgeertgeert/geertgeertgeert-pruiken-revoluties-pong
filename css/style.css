@@ -1,0 +1,355 @@
+:root {
+  --panel-bg: #14100C;
+  --gold-outer: #C9A227;
+  --gold-inner: #8A6D1F;
+  --ink: #EDE4D3;
+  --gold-highlight: #F2D368;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0A0A0F;
+  font-family: 'Crimson Pro', serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- Diorama: background layer ---------- */
+#bg-layer {
+  z-index: 1;
+  background: radial-gradient(ellipse at 50% 35%, var(--scene-mid, #2A2340) 0%, var(--scene-edge, #1A1A2E) 55%, #0A0A12 100%);
+  filter: blur(6px);
+  transform: scale(1.08); /* hide blurred edges */
+  transition: background 900ms ease;
+}
+#bg-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(0,0,0,0.75) 100%);
+}
+
+/* ---------- Particle layer ---------- */
+#particles-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ---------- Light bloom behind central sprite ---------- */
+#bloom {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  width: 46vmin;
+  height: 46vmin;
+  transform: translate(-50%, -50%) scale(1);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--bloom-color, rgba(255,214,120,0.20)) 0%, transparent 70%);
+  z-index: 3;
+  pointer-events: none;
+  animation: bloom-breathe 4s ease-in-out infinite;
+}
+@keyframes bloom-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.06); }
+}
+
+/* ---------- Sprite layer ---------- */
+#sprite-canvas {
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  height: 42vh;
+  width: auto;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  z-index: 4;
+}
+
+/* ---------- Foreground diorama frame (pillars/arch silhouettes) ---------- */
+#fg-layer {
+  z-index: 5;
+  pointer-events: none;
+}
+#fg-layer::before, #fg-layer::after {
+  content: "";
+  position: absolute;
+  top: -8%;
+  width: 20vw;
+  height: 118%;
+  background: rgba(5,4,8,0.92);
+  border-radius: 0 0 100% 0 / 0 0 40% 0;
+  filter: blur(12px);
+  opacity: 0.9;
+}
+#fg-layer::before {
+  left: -5vw;
+  border-radius: 0 0 0 100% / 0 0 0 40%;
+}
+#fg-layer::after {
+  right: -5vw;
+  border-radius: 0 0 100% 0 / 0 0 40% 0;
+}
+
+/* ================= UI layer ================= */
+#ui-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 4vw 3vh;
+  pointer-events: none;
+}
+
+.panel {
+  position: relative;
+  pointer-events: auto;
+  background: rgba(20, 16, 12, 0.92);
+  border: 2px solid var(--gold-outer);
+  outline: 3px solid var(--panel-bg);
+  outline-offset: -5px;
+  box-shadow: inset 0 0 0 1px var(--gold-inner);
+  padding: 1.4em 2em;
+  width: min(880px, 92vw);
+}
+
+.corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  color: var(--gold-outer);
+  font-size: 14px;
+  line-height: 1;
+}
+.corner::before { content: "◆"; }
+.corner.tl { top: -8px; left: -8px; }
+.corner.tr { top: -8px; right: -8px; }
+.corner.bl { bottom: -8px; left: -8px; }
+.corner.br { bottom: -8px; right: -8px; }
+
+#dialogue-panel {
+  margin-bottom: 1.2vh;
+  min-height: 14vh;
+}
+
+#speaker-name {
+  font-family: 'Cormorant SC', serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--gold-highlight);
+  font-size: 1.15rem;
+  margin-bottom: 0.4em;
+  text-transform: uppercase;
+  min-height: 1.2em;
+}
+
+#dialogue-text {
+  font-size: 1.25rem;
+  line-height: 1.5;
+  font-style: normal;
+}
+#dialogue-text.narration {
+  font-style: italic;
+  color: #C9BEA8;
+}
+
+#choices-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  width: min(880px, 92vw);
+  pointer-events: auto;
+}
+
+.choice-btn {
+  position: relative;
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.1rem;
+  color: var(--ink);
+  background: rgba(20, 16, 12, 0.88);
+  border: 1px solid var(--gold-inner);
+  padding: 0.7em 1em 0.7em 2.2em;
+  text-align: left;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+.choice-btn:hover, .choice-btn:focus-visible {
+  color: var(--gold-highlight);
+  border-color: var(--gold-outer);
+  outline: none;
+}
+.choice-btn::before {
+  content: "▶";
+  position: absolute;
+  left: 0.9em;
+  top: 50%;
+  color: var(--gold-highlight);
+  opacity: 0;
+  transform: translate(0, -50%);
+}
+.choice-btn:hover::before, .choice-btn:focus-visible::before {
+  opacity: 1;
+  animation: choice-arrow 600ms steps(2) infinite;
+}
+@keyframes choice-arrow {
+  0% { transform: translate(0, -50%); }
+  100% { transform: translate(2px, -50%); }
+}
+
+/* ================= HUD (Eðian indicator) ================= */
+#hud {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.3em 0.7em;
+  background: rgba(20, 16, 12, 0.75);
+  border: 1px solid var(--gold-inner);
+}
+#hud-icon {
+  image-rendering: pixelated;
+  width: 22px;
+  height: 22px;
+}
+#hud-day {
+  font-family: 'VT323', monospace;
+  font-size: 1.4rem;
+  color: var(--gold-highlight);
+  letter-spacing: 0.05em;
+}
+
+/* ================= Day transition ================= */
+#day-transition {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 500ms ease;
+}
+#day-transition.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#day-title {
+  font-family: 'Cormorant SC', serif;
+  font-weight: 700;
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  color: var(--gold-highlight);
+  text-transform: uppercase;
+  opacity: 0;
+}
+#day-title.animate-in {
+  animation: day-title-in 1600ms ease forwards;
+}
+@keyframes day-title-in {
+  0%   { opacity: 0; letter-spacing: 0.5em; }
+  100% { opacity: 1; letter-spacing: 0.2em; }
+}
+
+.ornament {
+  width: min(420px, 60vw);
+  height: 10px;
+  margin: 1.2em 0;
+  position: relative;
+  opacity: 0.85;
+}
+.ornament::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-outer) 20%, var(--gold-outer) 80%, transparent);
+}
+.ornament::after {
+  content: "◆";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--gold-outer);
+  font-size: 10px;
+  background: #000;
+  padding: 0 8px;
+}
+
+/* ================= Scene fade / zoom transition ================= */
+#fade-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+#fade-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#bg-layer.scene-zoom,
+#sprite-canvas.scene-zoom,
+#fg-layer.scene-zoom {
+  animation: scene-zoom-out 800ms ease;
+}
+@keyframes scene-zoom-out {
+  from { transform: scale(1.04) translateX(0); }
+  to   { transform: scale(1) translateX(0); }
+}
+#sprite-canvas.scene-zoom {
+  animation-name: scene-zoom-out-sprite;
+}
+@keyframes scene-zoom-out-sprite {
+  from { transform: translateX(-50%) scale(1.04); }
+  to   { transform: translateX(-50%) scale(1); }
+}
+
+/* ================= Eðian reveal (prologue) ================= */
+#sprite-canvas.revealing {
+  clip-path: inset(100% 0 0 0);
+}
+
+@media (max-width: 640px) {
+  #dialogue-text { font-size: 1.05rem; }
+  .choice-btn { font-size: 1rem; }
+}

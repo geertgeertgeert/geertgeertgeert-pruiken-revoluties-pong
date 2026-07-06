@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eðian — een HD-2D verhaal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="game">
+
+  <!-- Diorama layers -->
+  <div id="bg-layer" class="layer"></div>
+  <canvas id="particles-canvas"></canvas>
+  <div id="bloom"></div>
+  <canvas id="sprite-canvas"></canvas>
+  <div id="fg-layer" class="layer"></div>
+
+  <!-- HUD: Eðian indicator -->
+  <div id="hud">
+    <canvas id="hud-icon"></canvas>
+    <span id="hud-day">I</span>
+  </div>
+
+  <!-- Dialogue / choices UI -->
+  <div id="ui-layer">
+    <div id="dialogue-panel" class="panel">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div id="speaker-name"></div>
+      <div id="dialogue-text"></div>
+    </div>
+    <div id="choices-panel"></div>
+  </div>
+
+  <!-- Day / chapter transition -->
+  <div id="day-transition">
+    <div class="ornament ornament-top"></div>
+    <div id="day-title"></div>
+    <div class="ornament ornament-bottom"></div>
+  </div>
+
+  <!-- Scene fade -->
+  <div id="fade-overlay"></div>
+
+</div>
+<script src="js/sprites.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/story.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
