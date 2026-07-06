@@ -15,9 +15,72 @@
   const particlesCanvas = document.getElementById('particles-canvas');
   const hudIcon = document.getElementById('hud-icon');
   const hudDay = document.getElementById('hud-day');
+  const gameEl = document.getElementById('game');
+  const worldCanvas = document.getElementById('world-canvas');
+  const worldTip = document.getElementById('world-tip');
+  const worldHint = document.getElementById('world-hint');
 
   Particles.init(particlesCanvas);
   Sprites.draw(hudIcon, 'giffordHorse', 1, 1);
+
+  if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+    worldTip.textContent = 'D-pad = lopen · E = reageren';
+  }
+
+  let worldTipTimer = null;
+  function showWorldTip() {
+    clearTimeout(worldTipTimer);
+    worldTip.classList.add('visible');
+    worldTipTimer = setTimeout(() => worldTip.classList.remove('visible'), 3800);
+  }
+
+  function hideDialogueUI() {
+    clearAdvance();
+    clearTimeout(typewriterTimer);
+    advancing = false;
+    dialoguePanel.style.display = 'none';
+    choicesPanel.style.display = 'none';
+    choicesPanel.innerHTML = '';
+  }
+  function showDialogueUI() {
+    dialoguePanel.style.display = '';
+    choicesPanel.style.display = '';
+  }
+
+  World.init(worldCanvas, {
+    onInteract(entity) {
+      worldHint.classList.remove('visible');
+      World.setMovementEnabled(false);
+      if (entity.type === 'npc') {
+        World.markTalked(entity.id);
+        if (entity.finalConversation) gameEl.classList.remove('mode-explore');
+        goTo(entity.talk);
+      } else if (entity.type === 'exit') {
+        goTo(entity.next);
+      }
+    },
+    onNearbyChange(entity) {
+      if (!entity) { worldHint.classList.remove('visible'); return; }
+      if (entity.type === 'npc') {
+        worldHint.innerHTML = `<kbd>E</kbd> praten met ${entity.label}`;
+      } else {
+        worldHint.innerHTML = `<kbd>E</kbd> ${entity.hint || 'verder'}`;
+      }
+      worldHint.classList.add('visible');
+    },
+  });
+
+  document.querySelectorAll('.touch-btn').forEach((btn) => {
+    const dir = btn.dataset.dir;
+    btn.addEventListener('pointerdown', (e) => { e.preventDefault(); World.setDirKey(dir, true); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach((evt) => {
+      btn.addEventListener(evt, () => World.setDirKey(dir, false));
+    });
+  });
+  document.getElementById('touch-interact').addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    World.triggerInteract();
+  });
 
   const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 
@@ -187,7 +250,7 @@
     if (!node) return;
 
     if (node.type === 'daytitle') {
-      choicesPanel.innerHTML = '';
+      hideDialogueUI();
       textEl.textContent = '';
       speakerEl.textContent = '';
       showDayTitle(node.day, node.next);
@@ -195,10 +258,33 @@
     }
 
     if (node.type === 'transform') {
+      gameEl.classList.remove('mode-explore');
+      showDialogueUI();
       playTransformation(node);
       return;
     }
 
+    if (node.type === 'explore') {
+      hideDialogueUI();
+      applyScene(node.scene);
+      gameEl.classList.add('mode-explore');
+      World.enterMap(WORLD_MAPS[node.map]);
+      showWorldTip();
+      if (node.auto) {
+        World.setMovementEnabled(false);
+        setTimeout(() => goTo(node.auto), 900);
+      }
+      return;
+    }
+
+    if (node.type === 'returnExplore') {
+      hideDialogueUI();
+      World.setMovementEnabled(true);
+      return;
+    }
+
+    if (node.type === 'end') gameEl.classList.remove('mode-explore');
+    showDialogueUI();
     renderNode(node);
   }
 

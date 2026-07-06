@@ -39,7 +39,8 @@ const STORY = {
       next: 'day1_title',
     },
 
-    day1_title: { type: 'daytitle', day: 1, next: 'day1_1' },
+    day1_title: { type: 'daytitle', day: 1, next: 'day1_explore' },
+    day1_explore: { type: 'explore', scene: 'bruiloft', map: 'bruiloft' },
 
     day1_1: {
       type: 'dialogue', scene: 'bruiloft', sprite: 'giffordHorse',
@@ -52,20 +53,22 @@ const STORY = {
     day1_2a: {
       type: 'dialogue', scene: 'bruiloft', sprite: 'giffordHorse',
       speaker: 'Jane', text: 'Een vloek kiest niemand zelf. Ik zal hem naar zijn daden beoordelen, niet naar zijn vorm.',
-      next: 'day2_title',
+      next: 'day1_return',
     },
     day1_2b: {
       type: 'dialogue', scene: 'bruiloft', sprite: 'giffordHorse',
       speaker: 'Jane', text: 'Een gearrangeerd huwelijk, een gevloekte bruidegom, en een hof vol messen achter glimlachen. Ik hou mijn boek dicht bij de hand.',
-      next: 'day2_title',
+      next: 'day1_return',
     },
+    day1_return: { type: 'returnExplore' },
 
-    day2_title: { type: 'daytitle', day: 2, next: 'day2_1' },
+    day2_title: { type: 'daytitle', day: 2, next: 'day2_explore' },
+    day2_explore: { type: 'explore', scene: 'troonzaal', map: 'troonzaal' },
 
     day2_1: {
       type: 'dialogue', scene: 'troonzaal', sprite: 'edward',
       speaker: 'Koning Edward', text: 'Elke avond word ik zwakker, Jane. De medicijnmeesters fluisteren over een zwak hart. Ik ruik iets anders in mijn beker.',
-      next: 'day2_2',
+      next: 'day2_return',
     },
     day2_2: {
       type: 'dialogue', scene: 'troonzaal', sprite: 'bottle',
@@ -78,21 +81,25 @@ const STORY = {
     day2_3a: {
       type: 'dialogue', scene: 'troonzaal', sprite: 'edward',
       speaker: 'Jane', text: 'Vergif, Majesteit. Geen ziekte van het hart — een hand die u dat hart wil ontnemen.',
-      next: 'day3_title',
+      next: 'day2_return',
     },
     day2_3b: {
       type: 'dialogue', scene: 'troonzaal', sprite: 'edward',
       speaker: 'Jane', text: 'Ik zeg niets — maar mijn boek onthoudt alles. Wie dit flesje daar zette, zal zichzelf verraden.',
-      next: 'day3_title',
+      next: 'day2_return',
     },
+    day2_return: { type: 'returnExplore' },
 
-    day3_title: { type: 'daytitle', day: 3, next: 'day3_1' },
+    day3_title: { type: 'daytitle', day: 3, next: 'day3_explore' },
+    day3_explore: { type: 'explore', scene: 'tower', map: 'tower', auto: 'day3_1' },
 
     day3_1: {
       type: 'dialogue', scene: 'tower', sprite: 'tower',
       speaker: '', text: 'De koning is dood. Binnen een dag staat er een kroon op Janes hoofd — en binnen een week de Tower om haar heen.',
-      next: 'day3_2',
+      next: 'day3_return',
     },
+    day3_return: { type: 'returnExplore' },
+
     day3_2: {
       type: 'dialogue', scene: 'tower', sprite: 'crown',
       speaker: 'Jane', text: 'Een kroon die niemand mij vroeg te dragen, in een toren die niemand mij vroeg te betreden. Maar ik ben hier, en ik kies nog steeds.',

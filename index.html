@@ -12,12 +12,27 @@
 <body>
 <div id="game">
 
-  <!-- Diorama layers -->
+  <!-- Diorama layers (static cinematic scenes) -->
   <div id="bg-layer" class="layer"></div>
   <canvas id="particles-canvas"></canvas>
   <div id="bloom"></div>
   <canvas id="sprite-canvas"></canvas>
+
+  <!-- Walkable 3D overworld (day maps) -->
+  <canvas id="world-canvas"></canvas>
+  <div id="world-tip">WASD / pijltjes = lopen &nbsp;·&nbsp; E = reageren</div>
+  <div id="world-hint"></div>
+
   <div id="fg-layer" class="layer"></div>
+
+  <!-- Touch controls (shown on touch devices only) -->
+  <div id="touch-dpad">
+    <button class="touch-btn" data-dir="up" aria-label="Loop naar boven">▲</button>
+    <button class="touch-btn" data-dir="left" aria-label="Loop naar links">◀</button>
+    <button class="touch-btn" data-dir="right" aria-label="Loop naar rechts">▶</button>
+    <button class="touch-btn" data-dir="down" aria-label="Loop naar beneden">▼</button>
+  </div>
+  <button id="touch-interact" aria-label="Reageren">E</button>
 
   <!-- HUD: Eðian indicator -->
   <div id="hud">
@@ -47,8 +62,11 @@
   <div id="fade-overlay"></div>
 
 </div>
+<script src="js/vendor/three.min.js"></script>
 <script src="js/sprites.js"></script>
 <script src="js/particles.js"></script>
+<script src="js/world-maps.js"></script>
+<script src="js/world.js"></script>
 <script src="js/story.js"></script>
 <script src="js/game.js"></script>
 </body>
