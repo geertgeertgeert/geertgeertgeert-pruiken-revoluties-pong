@@ -18,6 +18,26 @@ import {
   CijfersDieJeOvertuigenSchema,
 } from "./CijfersDieJeOvertuigen";
 import { TerugNaarSchool } from "./TerugNaarSchool";
+import {
+  PodcastVanDeWeek,
+  PodcastVanDeWeekSchema,
+} from "./PodcastVanDeWeek";
+import {
+  DocumentaireAanbeveling,
+  DocumentaireAanbevelingSchema,
+} from "./DocumentaireAanbeveling";
+import {
+  InstagramAanbeveling,
+  InstagramAanbevelingSchema,
+} from "./InstagramAanbeveling";
+import {
+  GeheimePlekVoorBoeken,
+  GeheimePlekVoorBoekenSchema,
+} from "./GeheimePlekVoorBoeken";
+import {
+  KerndoelenGrijpmachine,
+  KerndoelenGrijpmachineSchema,
+} from "./KerndoelenGrijpmachine";
 
 const PORTRAIT = { width: 1080, height: 1920, fps: 30 };
 
@@ -102,6 +122,60 @@ export const RemotionRoot: React.FC = () => {
         component={TerugNaarSchool}
         durationInFrames={15 * PORTRAIT.fps}
         {...PORTRAIT}
+      />
+      <Composition
+        id="PodcastVanDeWeek"
+        component={PodcastVanDeWeek}
+        durationInFrames={15 * PORTRAIT.fps}
+        {...PORTRAIT}
+        schema={PodcastVanDeWeekSchema}
+        defaultProps={{
+          podcastNaam: "Vul hier de podcastnaam in",
+          aflevering: "bijv. een aflevering van een paar jaar terug",
+        }}
+      />
+      <Composition
+        id="DocumentaireAanbeveling"
+        component={DocumentaireAanbeveling}
+        durationInFrames={15 * PORTRAIT.fps}
+        {...PORTRAIT}
+        schema={DocumentaireAanbevelingSchema}
+        defaultProps={{
+          titel: "Vul hier de documentairetitel in",
+        }}
+      />
+      <Composition
+        id="InstagramAanbeveling"
+        component={InstagramAanbeveling}
+        durationInFrames={12 * PORTRAIT.fps}
+        {...PORTRAIT}
+        schema={InstagramAanbevelingSchema}
+        defaultProps={{
+          handle: "@vul-hier-het-profiel-in",
+          reden: "Vul hier in waarom dit profiel het verdient.",
+        }}
+      />
+      <Composition
+        id="GeheimePlekVoorBoeken"
+        component={GeheimePlekVoorBoeken}
+        durationInFrames={22 * PORTRAIT.fps}
+        {...PORTRAIT}
+        schema={GeheimePlekVoorBoekenSchema}
+        defaultProps={{
+          plekNaam: "Vul hier de naam/locatie van de plek in",
+        }}
+      />
+      <Composition
+        id="KerndoelenGrijpmachine"
+        component={KerndoelenGrijpmachine}
+        durationInFrames={20 * PORTRAIT.fps}
+        {...PORTRAIT}
+        schema={KerndoelenGrijpmachineSchema}
+        defaultProps={{
+          kerndoel1: "Vul hier kerndoel 1 in",
+          kerndoel2: "Vul hier kerndoel 2 in",
+          boekTitel: "Vul hier de boektitel in",
+        }}
       />
     </>
   );
