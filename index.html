@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Interactieve kapstok van de CAD-groep: hang zinnen en woorden aan zes haakjes. Aanvullen gaat via een QR-code.">
+<meta name="color-scheme" content="light dark">
+<title>De kapstok van de CAD-groep</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/huisstijl.css">
+<link rel="stylesheet" href="assets/kapstok.css">
+</head>
+<body>
+
+<a class="overslaan" href="#paneel">Naar de zinnen</a>
+
+<header class="kop">
+  <div class="merk">
+    <span class="merk__logo" aria-hidden="true"></span>
+    <div>
+      <h1 id="titel">De kapstok van de CAD-groep</h1>
+      <p id="ondertitel">Hang je zin of woord aan een haakje.</p>
+    </div>
+  </div>
+  <div class="kop__acties">
+    <button type="button" class="knop" id="knop-qr">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M1 1h6v6H1V1zm2 2v2h2V3H3zM9 1h6v6H9V1zm2 2v2h2V3h-2zM1 9h6v6H1V9zm2 2v2h2v-2H3zM9 9h2v2H9V9zm4 0h2v2h-2V9zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/>
+      </svg>
+      QR-code
+    </button>
+    <button type="button" class="knop" id="knop-beheer">Beheer</button>
+  </div>
+</header>
+
+<p class="melding" id="melding" role="status" aria-live="polite" hidden></p>
+
+<main class="werkblad">
+
+  <section class="kapstok-kolom" aria-labelledby="kapstok-kop">
+    <h2 id="kapstok-kop" class="verborgen-tekst">De kapstok met zes haakjes</h2>
+    <div class="kapstok" id="kapstok" role="tablist" aria-labelledby="kapstok-kop">
+      <span class="kapstok__knop" aria-hidden="true"></span>
+      <span class="kapstok__staander" aria-hidden="true"></span>
+      <svg class="kapstok__voet" viewBox="0 0 216 96" fill="none" aria-hidden="true">
+        <path d="M108 40 22 86M108 40l86 46M108 40v46" stroke="currentColor" stroke-width="11" stroke-linecap="round"/>
+        <ellipse cx="108" cy="88" rx="94" ry="7" fill="currentColor" opacity="0.12"/>
+      </svg>
+      <!-- De zes haakjes worden door app.js geplaatst. -->
+    </div>
+  </section>
+
+  <section class="paneel" id="paneel" aria-labelledby="paneel-kop">
+    <div class="paneel__kop">
+      <h2 id="paneel-kop">Een moment…</h2>
+      <p id="paneel-teller"></p>
+    </div>
+    <div class="paneel__lijf" id="paneel-lijf">
+      <p class="leeg">De kapstok wordt opgehaald.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="voet">
+  <p id="modus-melding"></p>
+  <p>Iedereen kan zinnen <strong>toevoegen</strong> en de tekst <strong>bijschaven</strong>. Weghalen kan alleen de beheerder — zo raakt er niets per ongeluk kwijt.</p>
+</footer>
+
+<!-- ------------------------------------------------------------- QR-code -- -->
+<dialog id="qr-dialoog" aria-labelledby="qr-kop">
+  <div class="dialoog__kop">
+    <h2 id="qr-kop">Scan om aan te vullen</h2>
+    <button type="button" class="knop knop--stil" data-sluit aria-label="Sluiten">✕</button>
+  </div>
+  <div class="dialoog__lijf">
+    <p>Hang deze code op bij de kapstok. Wie hem scant, komt direct in het invoervak terecht.</p>
+    <div class="segment" role="group" aria-label="Waar de code naartoe leidt">
+      <button type="button" id="qr-heel" aria-pressed="true">Hele kapstok</button>
+      <button type="button" id="qr-haak" aria-pressed="false">Alleen dit haakje</button>
+    </div>
+    <div class="qr-vlak" id="qr-vlak"></div>
+    <p class="qr-link">
+      <code id="qr-adres"></code>
+      <button type="button" class="knop knop--klein" id="qr-kopieer">Link kopiëren</button>
+      <button type="button" class="knop knop--klein" id="qr-print">Afdrukken</button>
+    </p>
+  </div>
+</dialog>
+
+<!-- --------------------------------------------------------------- beheer -- -->
+<dialog id="beheer-dialoog" aria-labelledby="beheer-kop">
+  <div class="dialoog__kop">
+    <h2 id="beheer-kop">Beheer</h2>
+    <button type="button" class="knop knop--stil" data-sluit aria-label="Sluiten">✕</button>
+  </div>
+  <div class="dialoog__lijf" id="beheer-lijf"></div>
+</dialog>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/qr.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
