@@ -1,0 +1,643 @@
+<title>Oertocht</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap">
+<style>
+/* Layout: een trekkaart als band bovenaan, daaronder het verhaal met de opdracht, en een smalle kolom met de groep en de spiegel. */
+:root {
+  --bg: #e6eae1;          /* mist boven de kwelder */
+  --surface: #f4f6ef;
+  --sunk: #dde2d6;
+  --ink: #1b2320;
+  --muted: #59655e;
+  --line: #c3cbbf;
+  --accent: #245a4b;      /* riet en zeegroen */
+  --accent-soft: #cfe0d6;
+  --ember: #b44c18;       /* vuur: alleen voor vuur en de plek waar je bent */
+  --warn: #8d6200;
+  --warn-soft: #f1e3bd;
+  --bad: #a1372a;
+  --bad-soft: #f2d6cf;
+  --good: #356a30;
+  --good-soft: #d6e8cf;
+  --sea: #b9cfcb;
+  --land: #cfd6c4;
+  --font-display: "Big Shoulders Display", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "Literata", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --fs: 17px;
+  --radius: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101512; --surface: #18201b; --sunk: #0c100e; --ink: #e2e8df; --muted: #93a098; --line: #2c3731;
+    --accent: #7db8a3; --accent-soft: #1f3a31; --ember: #ff9156; --warn: #e6b84b; --warn-soft: #3a2f12;
+    --bad: #ff8b77; --bad-soft: #3d1f1a; --good: #95d184; --good-soft: #1f3420; --sea: #1b3634; --land: #232b24;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101512; --surface: #18201b; --sunk: #0c100e; --ink: #e2e8df; --muted: #93a098; --line: #2c3731;
+  --accent: #7db8a3; --accent-soft: #1f3a31; --ember: #ff9156; --warn: #e6b84b; --warn-soft: #3a2f12;
+  --bad: #ff8b77; --bad-soft: #3d1f1a; --good: #95d184; --good-soft: #1f3420; --sea: #1b3634; --land: #232b24;
+  color-scheme: dark;
+}
+:root.big { --fs: 21px; }
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--fs); line-height: 1.55;
+  margin: 0;
+}
+.wrap {
+  max-width: 1240px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 800; letter-spacing: .01em; text-wrap: balance; margin: 0; line-height: 1; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--ember); outline-offset: 2px; border-radius: 3px; }
+.btn {
+  appearance: none; border: 1.5px solid var(--ink); background: var(--ink); color: var(--bg);
+  font-family: var(--font-display); font-weight: 600; font-size: 1.15em; letter-spacing: .06em; text-transform: uppercase;
+  padding: .5em 1.1em .45em; border-radius: var(--radius); cursor: pointer;
+}
+.btn:hover { background: var(--accent); border-color: var(--accent); }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.ghost:hover { background: var(--sunk); color: var(--ink); border-color: var(--ink); }
+.btn.small { font-size: .9em; padding: .35em .8em .3em; }
+.label { font-family: var(--font-mono); font-size: .72em; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- Start ---------- */
+.start { padding-block: 40px 56px; }
+.start-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+.title {
+  font-size: clamp(64px, 13vw, 168px); line-height: .82; text-transform: uppercase; letter-spacing: -.01em;
+  color: var(--ink);
+}
+.title span { color: var(--ember); }
+.era { font-family: var(--font-mono); font-size: .8em; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+.premise { max-width: 34em; font-size: 1.08em; }
+.premise p { margin: 0 0 .7em; }
+.premise strong { font-weight: 600; }
+.rules { list-style: none; padding: 0; margin: 22px 0 28px; display: grid; gap: 8px; max-width: 34em; }
+.rules li { display: grid; grid-template-columns: 2.2em 1fr; gap: 6px; align-items: baseline; }
+.rules li b { font-family: var(--font-display); font-weight: 800; font-size: 1.3em; color: var(--accent); }
+.start-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.party-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.pcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+.pcard h3 { font-size: 1.9em; text-transform: uppercase; }
+.pcard .role { font-family: var(--font-mono); font-size: .75em; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.pcard p { margin: 8px 0 0; font-size: .92em; }
+.map-note { margin-top: 18px; font-size: .9em; color: var(--muted); }
+
+/* ---------- Bovenbalk ---------- */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.topbar .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding-block: 10px; }
+.brand { font-family: var(--font-display); font-weight: 800; font-size: 1.6em; text-transform: uppercase; letter-spacing: .02em; }
+.brand span { color: var(--ember); }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: .82em; align-items: center; font-variant-numeric: tabular-nums; }
+.stat { display: inline-flex; gap: 6px; align-items: baseline; }
+.stat .k { color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-size: .9em; }
+.stat .v { font-weight: 500; }
+.stat.low .v { color: var(--bad); }
+.stat.fire .v { color: var(--ember); }
+.tools { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- Kaart ---------- */
+.trail { padding-block: 14px 4px; }
+.trail svg { display: block; width: 100%; height: auto; }
+.trail-wrap { overflow-x: auto; }
+.trail-inner { min-width: 560px; }
+.trail .cap { font-size: .8em; color: var(--muted); margin: 2px 0 0; }
+
+/* ---------- Spel ---------- */
+.game { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; padding-block: 12px 64px; align-items: start; }
+.story { min-width: 0; display: grid; gap: 18px; }
+.scene { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px 18px; }
+.scene h2 { font-size: 2.4em; text-transform: uppercase; }
+.scene .where { margin-bottom: 6px; }
+.scene p { margin: .55em 0 0; max-width: 40em; }
+.log { display: grid; gap: 16px; }
+.turn { border-left: 3px solid var(--line); padding: 2px 0 2px 16px; display: grid; gap: 8px; }
+.turn.latest { border-left-color: var(--accent); }
+.said { font-family: var(--font-mono); font-size: .9em; line-height: 1.8; margin: 0; overflow-wrap: anywhere; }
+.said .t { border-radius: 3px; padding: 1px 1px; }
+.t.verb { color: var(--accent); font-weight: 500; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.t.verb2 { color: var(--accent); }
+.t.actor { background: var(--accent-soft); color: var(--ink); font-weight: 500; padding: 1px 3px; }
+.t.obj { color: var(--ink); font-weight: 500; border-bottom: 2px solid var(--ink); }
+.t.mod { color: var(--ink); font-style: italic; border-bottom: 2px dotted var(--muted); }
+.t.link, .t.cond { color: var(--ember); }
+.t.neg { color: var(--ember); font-weight: 500; }
+.t.anach { color: var(--bad); background: var(--bad-soft); text-decoration: line-through wavy var(--bad); padding: 1px 3px; }
+.t.vague { color: var(--warn); background: var(--warn-soft); padding: 1px 3px; }
+.t.unk, .t.fn { color: var(--muted); opacity: .75; }
+.plain .t { all: unset; }
+.acts { display: grid; gap: 6px; }
+.acts p { margin: 0; max-width: 42em; }
+.acts p.info { color: var(--muted); font-style: italic; }
+.acts p.rule { font-family: var(--font-mono); font-size: .82em; color: var(--ember); }
+.acts p.leg { border-top: 1px dashed var(--line); padding-top: 8px; font-style: italic; }
+.acts .daymark { font-family: var(--font-mono); font-size: .75em; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+.acts .daymark::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+.acts .newscene { margin-top: 6px; background: var(--sunk); border-radius: var(--radius); padding: 12px 14px; }
+.acts .newscene h3 { font-size: 1.6em; text-transform: uppercase; }
+.acts .newscene p { margin: .4em 0 0; }
+.fxs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; }
+.fxs li { font-family: var(--font-mono); font-size: .75em; padding: 2px 8px; border-radius: 999px; background: var(--sunk); color: var(--muted); }
+.fxs li.bad { background: var(--bad-soft); color: var(--bad); }
+.fxs li.good { background: var(--good-soft); color: var(--good); }
+.mirror { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.mirror li { font-size: .92em; padding-left: 1.4em; position: relative; }
+.mirror li::before { content: "?"; position: absolute; left: 0; top: -.05em; font-family: var(--font-display); font-weight: 800; color: var(--warn); font-size: 1.2em; }
+.hide-mirror .mirror, .hide-mirror .side-mirror { display: none; }
+.turn .when { font-family: var(--font-mono); font-size: .7em; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+.composer { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 8px; }
+.composer label { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.composer textarea {
+  width: 100%; min-height: 4.2em; resize: vertical; font-family: var(--font-mono); font-size: 1em; line-height: 1.5;
+  background: var(--surface); color: var(--ink); border: 2px solid var(--ink); border-radius: var(--radius); padding: 10px 12px;
+}
+.composer textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.composer .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.composer .hint { font-size: .8em; color: var(--muted); }
+
+.end { background: var(--surface); border: 2px solid var(--ink); border-radius: var(--radius); padding: 20px 22px; display: grid; gap: 12px; }
+.end h2 { font-size: 2.6em; text-transform: uppercase; }
+.end p { margin: 0; max-width: 40em; }
+.parts { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0; }
+.parts li { font-family: var(--font-mono); font-size: .82em; padding: 4px 10px; border-radius: 999px; background: var(--sunk); }
+.parts li.gelukt { background: var(--good-soft); color: var(--good); }
+.parts li.mislukt { background: var(--bad-soft); color: var(--bad); }
+.parts li.half { background: var(--warn-soft); color: var(--warn); }
+.end .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* ---------- Zijkolom ---------- */
+.rail { display: grid; gap: 18px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 10px; }
+.box h3 { font-size: 1.35em; text-transform: uppercase; }
+.member { display: grid; grid-template-columns: 1fr auto; gap: 0 8px; align-items: baseline; }
+.member .nm { font-family: var(--font-display); font-weight: 800; font-size: 1.35em; text-transform: uppercase; line-height: 1.1; }
+.member .rl { font-family: var(--font-mono); font-size: .7em; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.member .tr { grid-column: 1 / -1; font-size: .82em; color: var(--muted); line-height: 1.4; }
+.pips { display: inline-flex; gap: 4px; }
+.pip { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--ink); background: var(--ink); }
+.pip.off { background: transparent; border-color: var(--line); }
+.member.weak .pip { border-color: var(--bad); background: var(--bad); }
+.member.weak .pip.off { background: transparent; border-color: var(--line); }
+.inv { list-style: none; padding: 0; margin: 0; display: grid; gap: 3px; font-size: .88em; }
+.inv li { display: flex; justify-content: space-between; gap: 8px; }
+.inv li span:last-child { font-family: var(--font-mono); font-size: .9em; color: var(--muted); text-align: right; }
+.inv li.hot span:last-child { color: var(--ember); }
+.legend { list-style: none; padding: 0; margin: 0; display: grid; gap: 5px; font-family: var(--font-mono); font-size: .78em; }
+.legend li { display: flex; gap: 8px; align-items: baseline; }
+.legend .t { min-width: 5.5em; }
+.side-mirror .empty { color: var(--muted); font-size: .88em; margin: 0; }
+
+/* ---------- Panelen ---------- */
+.panel-back { position: fixed; inset: 0; background: rgba(10, 14, 12, .55); z-index: 20; display: flex; justify-content: center; align-items: flex-start; overflow-y: auto; padding: max(24px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
+.panel { background: var(--surface); color: var(--ink); border-radius: var(--radius); max-width: 760px; width: 100%; padding: 22px 24px; display: grid; gap: 14px; border: 1px solid var(--line); }
+.panel header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.panel h2 { font-size: 2em; text-transform: uppercase; }
+.panel h3 { font-size: 1.3em; text-transform: uppercase; margin-top: 6px; }
+.panel p, .panel li { max-width: 44em; }
+.panel p { margin: 0; }
+.panel ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+.toggles { display: grid; gap: 8px; }
+.toggles label { display: flex; gap: 10px; align-items: center; cursor: pointer; }
+.toggles input { width: 1.2em; height: 1.2em; accent-color: var(--accent); }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; }
+.panel textarea { width: 100%; min-height: 320px; font-family: var(--font-mono); font-size: .8em; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px; }
+.confirm { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--warn-soft); padding: 10px 12px; border-radius: var(--radius); }
+
+@media (max-width: 920px) {
+  .game { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: static; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .start-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+}
+@media (max-width: 520px) {
+  .party-cards { grid-template-columns: minmax(0, 1fr); }
+  .scene { padding: 16px; }
+  .scene h2 { font-size: 2em; }
+  .tools { margin-left: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .turn.latest { animation: rise .35s ease-out both; }
+  @keyframes rise { from { transform: translateY(6px); opacity: .4; } to { transform: none; opacity: 1; } }
+  .here-ring { animation: pulse 2.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+  @keyframes pulse { 0%, 100% { opacity: .9; } 50% { opacity: .25; } }
+}
+</style>
+
+<!-- ===================== Startscherm ===================== -->
+<section id="start" class="start wrap" aria-labelledby="title">
+  <div class="start-grid">
+    <div>
+      <h1 id="title" class="title">Oer<span>tocht</span></h1>
+      <p class="era">Doggerland · ongeveer 8000 jaar voor Christus</p>
+      <div class="premise">
+        <p>Waar nu de Noordzee is, lag toen land: heuvels, rivieren, bossen en een lange kust. Een kleine groep trekt van het winterkamp naar de zee. Daar willen ze de zomer doorbrengen.</p>
+        <p><strong>Jij geeft de opdrachten. De groep doet precies wat je schrijft, niet wat je bedoelt.</strong></p>
+      </div>
+      <ol class="rules">
+        <li><b>1</b><span>Ze kennen alleen woorden voor dingen uit hun eigen tijd.</span></li>
+        <li><b>2</b><span>Ze antwoorden niet met woorden, maar met wat ze doen.</span></li>
+        <li><b>3</b><span>Elke opdracht kost tijd. Over veertien dagen is het seizoen voorbij.</span></li>
+        <li><b>4</b><span>Er zijn geen hints. Kijk goed wat ze dóen, en schrijf het opnieuw.</span></li>
+      </ol>
+      <div class="start-actions">
+        <button class="btn" id="btn-begin" type="button">Begin de tocht</button>
+        <button class="btn ghost" id="btn-continue" type="button" hidden>Ga verder</button>
+        <button class="btn ghost" id="btn-teacher-start" type="button">Voor de leraar</button>
+      </div>
+    </div>
+    <div>
+      <p class="label" style="margin:0 0 10px">De groep</p>
+      <div class="party-cards" id="party-cards"></div>
+      <p class="map-note">Alles in dit spel draait in je browser. Er wordt niets verstuurd en er zit geen chatbot in.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Spel ===================== -->
+<div id="play" hidden>
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brand" aria-label="Oertocht">Oer<span>tocht</span></div>
+      <div class="stats" id="stats" aria-live="polite"></div>
+      <div class="tools">
+        <button class="btn ghost small" id="btn-log" type="button">Logboek</button>
+        <button class="btn ghost small" id="btn-teacher" type="button">Leraar</button>
+        <button class="btn ghost small" id="btn-menu-restart" type="button">Opnieuw</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap trail">
+    <div class="trail-wrap"><div class="trail-inner" id="trail"></div></div>
+    <p class="cap">Van oost naar west, van het winterkamp naar de zee. Waar de groep loopt, ligt nu de Noordzee.</p>
+  </div>
+
+  <main class="wrap game">
+    <div class="story">
+      <section class="scene" id="scene" aria-live="polite"></section>
+      <div class="log" id="log" aria-live="polite"></div>
+      <div id="end" hidden></div>
+      <form class="composer" id="composer" autocomplete="off">
+        <label for="opdracht"><span class="label">Jouw opdracht</span><span class="hint">Enter = geven · Shift + Enter = nieuwe regel</span></label>
+        <textarea id="opdracht" name="opdracht" rows="3" spellcheck="true" placeholder="Schrijf wat de groep moet doen…"></textarea>
+        <div class="row">
+          <button class="btn" type="submit" id="btn-send">Geef opdracht</button>
+          <span class="hint" id="when-hint"></span>
+        </div>
+      </form>
+    </div>
+
+    <aside class="rail" aria-label="De groep en de spiegel">
+      <section class="box side-mirror" aria-live="polite">
+        <h3>Spiegel</h3>
+        <div id="mirror-latest"><p class="empty">Na je eerste opdracht staan hier vragen over je taal. Geen antwoorden.</p></div>
+      </section>
+      <section class="box">
+        <h3>De groep</h3>
+        <div id="members" style="display:grid;gap:10px"></div>
+      </section>
+      <section class="box">
+        <h3>Bij zich</h3>
+        <ul class="inv" id="inv"></ul>
+      </section>
+      <section class="box">
+        <h3>Wat de groep hoorde</h3>
+        <ul class="legend">
+          <li><span class="t verb">pak</span><span>handeling</span></li>
+          <li><span class="t actor">Keb</span><span>wie</span></li>
+          <li><span class="t obj">de speer</span><span>wat of waar</span></li>
+          <li><span class="t mod">stil</span><span>hoe, welke kant</span></li>
+          <li><span class="t link">als … dan</span><span>volgorde, afspraak</span></li>
+          <li><span class="t vague">daar</span><span>onduidelijk</span></li>
+          <li><span class="t anach">telefoon</span><span>kent de groep niet</span></li>
+          <li><span class="t unk">gevaarlijk</span><span>doet de groep niets mee</span></li>
+        </ul>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<!-- ===================== Panelen ===================== -->
+<div class="panel-back" id="panel-teacher" hidden role="dialog" aria-modal="true" aria-labelledby="t-title">
+  <div class="panel">
+    <header><h2 id="t-title">Voor de leraar</h2><button class="btn ghost small" type="button" data-close>Sluiten</button></header>
+    <p>Oertocht is een tekstspel in de traditie van <i>The Oregon Trail</i>, maar dan in Doggerland. De groep reageert alleen met gedrag op wat leerlingen schrijven. Wie slordig formuleert, ziet dat meteen terug. Daardoor loont precisie.</p>
+    <p>Er zit bewust geen taalmodel in. Een chatbot vult aan, raadt wat je bedoelt en strijkt onduidelijkheid glad. Deze groep doet dat niet. Alles draait in de browser, er gaat geen tekst naar een server, en dezelfde zin geeft in dezelfde situatie altijd hetzelfde gedrag. Zo kan de klas opdrachten naast elkaar leggen en vergelijken.</p>
+    <h3>Wat elke plek oefent</h3>
+    <ol>
+      <li><b>De rookpluim.</b> Taal als gereedschap. Woorden uit onze tijd (‘fabriek’, ‘aansteker’) werken niet, en ‘pak het vuur’ doet iets anders dan je denkt.</li>
+      <li><b>Het spoor bij de poel.</b> Inferenties: wat zie je, wat weet je, wat leid je eruit af? De wind van de eerste plek doet hier weer mee.</li>
+      <li><b>De grote rivier.</b> Volgorde en wie-doet-wat. Twee mensen per keer, en Tiko mag nooit alleen staan.</li>
+      <li><b>De nacht bij het bos.</b> Voorwaarden: ‘als …, dan …’. De wacht doet alleen wat is afgesproken.</li>
+      <li><b>De kust.</b> Het eindproduct: één uitgebreide opdracht, zo geschreven dat er precies gebeurt wat je wilt.</li>
+    </ol>
+    <h3>De spiegel</h3>
+    <p>Na elke beurt verschijnen hooguit twee vragen over de taal van de leerling, nooit over de oplossing. Ze zijn bedoeld als begin van het klassengesprek: van ‘hij begrijpt me niet’ naar ‘wat schreef ik eigenlijk, en wat bedoelde ik?’</p>
+    <div class="toggles">
+      <label><input type="checkbox" id="opt-mirror" checked> Spiegelvragen tonen</label>
+      <label><input type="checkbox" id="opt-colors" checked> Kleuren in de opdracht tonen</label>
+      <label><input type="checkbox" id="opt-big"> Grote letters (digibord)</label>
+    </div>
+    <h3>Begin bij een plek</h3>
+    <p>Voor een losse les. De groep begint met een redelijke voorraad.</p>
+    <div class="jump" id="jump"></div>
+  </div>
+</div>
+
+<div class="panel-back" id="panel-log" hidden role="dialog" aria-modal="true" aria-labelledby="l-title">
+  <div class="panel">
+    <header><h2 id="l-title">Logboek</h2><button class="btn ghost small" type="button" data-close>Sluiten</button></header>
+    <p>Alle opdrachten en wat de groep deed. Handig om in de klas te bespreken of in te leveren.</p>
+    <textarea id="log-text" readonly></textarea>
+    <div class="start-actions"><button class="btn" type="button" id="btn-copy">Kopieer logboek</button><span class="hint" id="copy-note"></span></div>
+  </div>
+</div>
+
+<div class="panel-back" id="panel-restart" hidden role="dialog" aria-modal="true" aria-labelledby="r-title">
+  <div class="panel">
+    <header><h2 id="r-title">Opnieuw</h2><button class="btn ghost small" type="button" data-close>Sluiten</button></header>
+    <p>Begin deze plek opnieuw met de voorraad van toen jullie hier aankwamen, of begin de hele tocht opnieuw. Het logboek blijft bewaard bij ‘deze plek’.</p>
+    <div class="start-actions">
+      <button class="btn" type="button" id="btn-restart-scene">Deze plek opnieuw</button>
+      <button class="btn ghost" type="button" id="btn-restart-all">Hele tocht opnieuw</button>
+    </div>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+(function () {
+  'use strict';
+  const O = window.Oertocht;
+  const $ = (s) => document.querySelector(s);
+  const KEY = 'oertocht:v1';
+  let G = null;
+  let prefs = { mirror: true, colors: true, big: false };
+
+  const store = {
+    load() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } },
+    save() { try { localStorage.setItem(KEY, JSON.stringify({ G, prefs })); } catch (e) { /* geen opslag: het spel werkt gewoon door */ } },
+  };
+
+  const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const PLACES = [
+    { id: 'kamp', name: 'Winterkamp', x: 940 },
+    { id: 'rook', name: 'Rookheuvel', x: 790 },
+    { id: 'spoor', name: 'Hertenpoel', x: 615 },
+    { id: 'rivier', name: 'Grote rivier', x: 445 },
+    { id: 'nacht', name: 'Eikenbos', x: 275 },
+    { id: 'kust', name: 'Kust', x: 105 },
+  ];
+  const PART_ORDER = { kamp: -1, rook: 0, spoor: 1, rivier: 2, nacht: 3, kust: 4 };
+
+  /* ---------- Startscherm ---------- */
+  function renderPartyCards() {
+    $('#party-cards').innerHTML = O.PARTY.map(id => {
+      const p = O.PEOPLE[id];
+      return '<article class="pcard"><div class="role">' + esc(p.role) + '</div><h3>' + esc(p.name) + '</h3><p>' + esc(p.trait) + '</p></article>';
+    }).join('');
+  }
+
+  /* ---------- Kaart ---------- */
+  function renderTrail() {
+    const cur = G.sceneIdx;
+    const W = 1000, H = 132, Y = 62;
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Kaart van de tocht. Jullie zijn bij ' + esc(PLACES[cur + 1].name) + '.">';
+    // zee links
+    s += '<path d="M0 0 H70 C88 18 58 34 78 52 C96 70 62 88 82 106 C92 116 74 124 80 132 H0 Z" fill="var(--sea)"/>';
+    s += '<text x="26" y="72" font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--muted)" letter-spacing="2">ZEE</text>';
+    // rivier
+    s += '<path d="M455 0 C430 30 470 52 445 74 C424 94 462 112 440 132" fill="none" stroke="var(--sea)" stroke-width="12" stroke-linecap="round"/>';
+    // heuvels bij de rook
+    s += '<path d="M752 56 L776 30 L800 56 Z M786 56 L806 38 L828 56 Z" fill="var(--land)"/>';
+    // berken
+    for (let i = 0; i < 6; i++) s += '<rect x="' + (586 + i * 11) + '" y="' + (30 + (i % 2) * 5) + '" width="3" height="22" fill="var(--line)"/>';
+    // bos
+    for (let i = 0; i < 5; i++) s += '<circle cx="' + (248 + i * 13) + '" cy="' + (40 + (i % 2) * 6) + '" r="9" fill="var(--land)"/>';
+    // pad
+    const xs = PLACES.map(p => p.x);
+    let d = 'M' + xs[0] + ' ' + Y;
+    for (let i = 1; i < xs.length; i++) { const mx = (xs[i - 1] + xs[i]) / 2; d += ' Q' + mx + ' ' + (Y + (i % 2 ? 12 : -12)) + ' ' + xs[i] + ' ' + Y; }
+    s += '<path d="' + d + '" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round"/>';
+    PLACES.forEach((p, i) => {
+      const order = PART_ORDER[p.id];
+      const done = order < cur;
+      const here = order === cur;
+      if (here) s += '<circle class="here-ring" cx="' + p.x + '" cy="' + Y + '" r="15" fill="none" stroke="var(--ember)" stroke-width="2"/>';
+      s += '<circle cx="' + p.x + '" cy="' + Y + '" r="' + (here ? 8 : 6) + '" fill="' + (here ? 'var(--ember)' : done ? 'var(--ink)' : 'var(--surface)') + '" stroke="' + (here ? 'var(--ember)' : 'var(--ink)') + '" stroke-width="2"/>';
+      s += '<text x="' + p.x + '" y="' + (Y + 38) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1" fill="' + (here ? 'var(--ink)' : 'var(--muted)') + '" font-weight="' + (here ? 600 : 400) + '">' + esc(p.name.toUpperCase()) + '</text>';
+    });
+    s += '</svg>';
+    $('#trail').innerHTML = s;
+    // Op een smal scherm scrollt de kaart naar de plek waar de groep is.
+    const wrap = document.querySelector('.trail-wrap');
+    if (wrap && wrap.scrollWidth > wrap.clientWidth) {
+      const x = PLACES[cur + 1].x / W * wrap.scrollWidth;
+      wrap.scrollLeft = Math.max(0, x - wrap.clientWidth / 2);
+    }
+  }
+
+  /* ---------- Status ---------- */
+  function renderStats() {
+    const st = O.status(G);
+    const daysLeft = st.deadline - st.day;
+    const fireTxt = st.fire ? 'smeult' : st.torch ? 'brandende tak' : 'uit';
+    $('#stats').innerHTML =
+      '<span class="stat' + (daysLeft <= 2 ? ' low' : '') + '"><span class="k">Dag</span><span class="v">' + st.day + ' / ' + st.deadline + '</span></span>' +
+      '<span class="stat"><span class="k">Nu</span><span class="v">' + esc(st.part) + '</span></span>' +
+      '<span class="stat' + (st.food <= 1 ? ' low' : '') + '"><span class="k">Voedsel</span><span class="v">' + st.food + '</span></span>' +
+      '<span class="stat' + (st.water === 0 ? ' low' : '') + '"><span class="k">Water</span><span class="v">' + st.water + ' / 3</span></span>' +
+      '<span class="stat' + (st.fire || st.torch ? ' fire' : '') + '"><span class="k">Vuur</span><span class="v">' + fireTxt + '</span></span>';
+    $('#when-hint').textContent = 'Dag ' + st.day + ', ' + st.part + '. Elke opdracht kost tijd.';
+    $('#members').innerHTML = O.PARTY.map(id => {
+      const p = O.PEOPLE[id], hp = st.hp[id];
+      let pips = '';
+      for (let i = 0; i < O.MAX_HP; i++) pips += '<span class="pip' + (i < hp ? '' : ' off') + '"></span>';
+      return '<div class="member' + (hp <= 1 ? ' weak' : '') + '"><div><div class="nm">' + esc(p.name) + '</div><div class="rl">' + esc(p.role) + '</div></div>' +
+        '<span class="pips" role="img" aria-label="Gezondheid ' + hp + ' van ' + O.MAX_HP + '">' + pips + '</span><div class="tr">' + esc(p.trait) + '</div></div>';
+    }).join('');
+    const inv = [
+      ['Speer', 'Ura'], ['Pijl en boog', 'Keb'], ['Vuursteen, pyriet', 'vonken'],
+      ['Tondelzwam', st.fire ? 'smeult, met vuur erin' : st.tinderWet ? 'nat' : 'droog'],
+      ['Huiden', 'vier'], ['Mand', st.food + ' porties'], ['Waterzak', st.water ? st.water + ' / 3' : 'leeg'],
+    ];
+    if (st.torch) inv.splice(4, 0, ['Brandende tak', 'brandt nog even']);
+    $('#inv').innerHTML = inv.map(([a, b]) => '<li class="' + ((a === 'Tondelzwam' && st.fire) || a === 'Brandende tak' ? 'hot' : '') + '"><span>' + esc(a) + '</span><span>' + esc(b) + '</span></li>').join('');
+  }
+
+  /* ---------- Plek en logboek ---------- */
+  function paras(text) { return String(text).split('\n').filter(Boolean).map(p => '<p>' + esc(p) + '</p>').join(''); }
+
+  function renderScene() {
+    const st = O.status(G);
+    const sc = O.SCENES[st.scene];
+    $('#scene').innerHTML = '<div class="label where">Plek ' + (st.sceneIdx + 1) + ' van 5 · ' + esc(sc.place) + '</div><h2>' + esc(sc.title) + '</h2>' + paras(st.intro);
+  }
+
+  function renderTokens(tokens) {
+    return tokens.map(t => {
+      if (t.c === 's') return t.raw;
+      if (t.c === 'p') return esc(t.raw);
+      return '<span class="t ' + t.c + '">' + esc(t.raw) + '</span>';
+    }).join('');
+  }
+
+  function renderEntry(e, latest) {
+    if (e.restart) {
+      return '<article class="turn"><div class="acts">' + e.out.map(renderOut).join('') + '</div></article>';
+    }
+    let h = '<article class="turn' + (latest ? ' latest' : '') + '">';
+    h += '<div class="when">' + esc(e.scene) + ' · ' + esc(e.when) + '</div>';
+    h += '<p class="said' + (prefs.colors ? '' : ' plain') + '">' + renderTokens(e.tokens) + '</p>';
+    h += '<div class="acts">' + e.out.map(renderOut).join('') + '</div>';
+    if (e.fx.length) h += '<ul class="fxs">' + e.fx.map(f => '<li class="' + f.kind + '">' + esc(f.label) + '</li>').join('') + '</ul>';
+    if (e.spiegel.length) h += '<ul class="mirror">' + e.spiegel.map(q => '<li>' + esc(q) + '</li>').join('') + '</ul>';
+    return h + '</article>';
+  }
+
+  function renderOut(o) {
+    if (o.k === 'day') return '<div class="daymark">' + esc(o.text) + '</div>';
+    if (o.k === 'scene') return '<div class="newscene"><div class="label">Nieuwe plek</div><h3>' + esc(o.title) + '</h3></div>';
+    return '<p class="' + esc(o.k) + '">' + esc(o.text).replace(/\n/g, '<br>') + '</p>';
+  }
+
+  function renderLog() {
+    const last = G.log.length - 1;
+    // Alleen de beurten van de huidige plek tonen; eerdere staan in het logboek.
+    let from = 0;
+    for (let i = G.log.length - 1; i >= 0; i--) {
+      const e = G.log[i];
+      if (e.restart || e.out.some(o => o.k === 'scene')) { from = i + (e.restart ? 0 : 0); break; }
+    }
+    const shown = G.log.slice(from).filter(e => !(e.restart && e.out.every(o => o.k === 'scene')));
+    $('#log').innerHTML = shown.map((e, i) => renderEntry(e, from + i === last && !e.restart)).join('');
+    const latest = G.log[last];
+    const qs = latest && latest.spiegel && latest.spiegel.length ? latest.spiegel : null;
+    $('#mirror-latest').innerHTML = qs ? '<ul class="mirror">' + qs.map(q => '<li>' + esc(q) + '</li>').join('') + '</ul>' : '<p class="empty">' + (latest && !latest.restart ? 'Geen vragen bij deze beurt.' : 'Na je eerste opdracht staan hier vragen over je taal. Geen antwoorden.') + '</p>';
+  }
+
+  function renderEnd() {
+    const end = $('#end');
+    if (!G.over) { end.hidden = true; $('#composer').hidden = false; return; }
+    $('#composer').hidden = true;
+    end.hidden = false;
+    const o = G.over;
+    const labels = { hut: 'hut', water: 'water', eten: 'eten', vuur: 'vuur' };
+    const an = Object.keys(G.stats.anach);
+    let h = '<div class="end"><div class="label">Einde van de tocht</div><h2>' + esc(o.title) + '</h2><p>' + esc(o.text) + '</p>';
+    if (o.parts) h += '<ul class="parts">' + Object.keys(o.parts).map(k => '<li class="' + o.parts[k] + '">' + labels[k] + ': ' + o.parts[k] + '</li>').join('') + '</ul>';
+    h += '<p class="label" style="margin-top:4px">In cijfers</p><p>' + G.stats.turns + ' opdrachten. ' +
+      (an.length ? 'Woorden die de groep niet kende: ' + esc(an.join(', ')) + '. ' : 'Geen woorden die de groep niet kende. ') +
+      G.stats.rules + ' afspraken met ‘als … dan’, waarvan ' + G.stats.rulesFired + ' gebruikt.</p>';
+    h += '<p>Kies één opdracht uit deze tocht die niet deed wat je bedoelde. Herschrijf hem zo dat hij wel werkt.</p>';
+    h += '<div class="actions">';
+    h += '<button class="btn" type="button" id="btn-end-scene">' + (o.final ? 'Herschrijf het plan' : 'Deze plek opnieuw') + '</button>';
+    h += '<button class="btn ghost" type="button" id="btn-end-log">Bekijk logboek</button>';
+    h += '<button class="btn ghost" type="button" id="btn-end-new">Nieuwe tocht</button></div></div>';
+    end.innerHTML = h;
+    $('#btn-end-scene').onclick = () => { G = O.restartScene(G); after(); };
+    $('#btn-end-log').onclick = openLog;
+    $('#btn-end-new').onclick = () => { G = O.newGame(); after(); };
+  }
+
+  function renderAll() {
+    document.documentElement.classList.toggle('big', !!prefs.big);
+    document.body.classList.toggle('hide-mirror', !prefs.mirror);
+    renderTrail(); renderStats(); renderScene(); renderLog(); renderEnd();
+  }
+
+  function after() { renderAll(); store.save(); }
+
+  /* ---------- Opdracht geven ---------- */
+  function send() {
+    const ta = $('#opdracht');
+    const text = ta.value.trim();
+    if (!text || !G || G.over) { ta.focus(); return; }
+    O.turn(G, text);
+    ta.value = '';
+    after();
+    const latest = document.querySelector('.turn.latest');
+    if (latest) latest.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    if (!G.over) ta.focus();
+    else $('#end').scrollIntoView({ block: 'start' });
+  }
+  $('#composer').addEventListener('submit', (ev) => { ev.preventDefault(); send(); });
+  $('#opdracht').addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); send(); }
+  });
+
+  /* ---------- Schermen en panelen ---------- */
+  function showPlay() { $('#start').hidden = true; $('#play').hidden = false; renderAll(); window.scrollTo(0, 0); setTimeout(() => $('#opdracht').focus(), 0); }
+  function openPanel(id) { const p = $(id); p.hidden = false; const c = p.querySelector('[data-close]'); if (c) c.focus(); }
+  function closePanels() { document.querySelectorAll('.panel-back').forEach(p => { p.hidden = true; }); }
+  document.querySelectorAll('.panel-back').forEach(p => {
+    p.addEventListener('click', (ev) => { if (ev.target === p || ev.target.hasAttribute('data-close')) closePanels(); });
+  });
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closePanels(); });
+
+  function openLog() {
+    $('#log-text').value = O.report(G);
+    $('#copy-note').textContent = '';
+    openPanel('#panel-log');
+  }
+  $('#btn-log').onclick = openLog;
+  $('#btn-copy').onclick = () => {
+    const ta = $('#log-text');
+    const done = () => { $('#copy-note').textContent = 'Gekopieerd.'; };
+    const fallback = () => { ta.focus(); ta.select(); $('#copy-note').textContent = 'Kopiëren lukt hier niet automatisch. De tekst is geselecteerd: gebruik Ctrl+C of Cmd+C.'; };
+    try { navigator.clipboard.writeText(ta.value).then(done, fallback); } catch (e) { fallback(); }
+  };
+  $('#btn-teacher').onclick = () => openPanel('#panel-teacher');
+  $('#btn-teacher-start').onclick = () => openPanel('#panel-teacher');
+  $('#btn-menu-restart').onclick = () => openPanel('#panel-restart');
+  $('#btn-restart-scene').onclick = () => { closePanels(); G = O.restartScene(G); after(); $('#opdracht').focus(); };
+  $('#btn-restart-all').onclick = () => { closePanels(); G = O.newGame(); after(); $('#opdracht').focus(); };
+
+  $('#jump').innerHTML = O.SCENE_ORDER.map((id, i) => '<button class="btn ghost small" type="button" data-jump="' + id + '">' + (i + 1) + '. ' + esc(O.SCENES[id].title) + '</button>').join('');
+  $('#jump').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-jump]');
+    if (!b) return;
+    G = b.dataset.jump === 'rook' ? O.newGame() : O.startAt(b.dataset.jump);
+    closePanels(); store.save(); showPlay();
+  });
+  const bindOpt = (id, key) => {
+    const el = $(id);
+    el.checked = !!prefs[key];
+    el.onchange = () => { prefs[key] = el.checked; if (G) after(); else store.save(); document.documentElement.classList.toggle('big', !!prefs.big); };
+  };
+
+  $('#btn-begin').onclick = () => { G = O.newGame(); store.save(); showPlay(); };
+  $('#btn-continue').onclick = () => { showPlay(); };
+
+  /* ---------- Opstarten ---------- */
+  function start(data) {
+    const saved = (data && data.G) ? data : store.load();
+    if (saved && saved.prefs) prefs = Object.assign(prefs, saved.prefs);
+    bindOpt('#opt-mirror', 'mirror'); bindOpt('#opt-colors', 'colors'); bindOpt('#opt-big', 'big');
+    document.documentElement.classList.toggle('big', !!prefs.big);
+    renderPartyCards();
+    if (saved && saved.G && saved.G.v === 1 && saved.G.log && saved.G.log.length) {
+      G = saved.G;
+      $('#btn-continue').hidden = false;
+      if (data && data.view === 'play') showPlay();
+    }
+  }
+  if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
+    window.claude.hot.snapshot(() => ({ G, prefs, view: $('#play').hidden ? 'start' : 'play' }));
+  }
+  if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start);
+  else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+})();
+</script>
