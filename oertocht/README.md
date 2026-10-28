@@ -22,6 +22,7 @@ Gebaseerd op de bijdrage van Geert Vermeegen in *Als wij denken* (Pica, 2026).
 
 - `index.html`: de pagina
 - `engine.js`: parser, wereldmodel en scènes (werkt ook in Node)
+- `tafereel.js`: het landschap op canvas, in de stijl van The Oregon Trail (2021). Het laat zien wat de woorden van de speler deden, zonder hints
 - `test.js`: `node oertocht/test.js`
 
 `index.html` is geschreven als artifact-pagina zonder `<!doctype>`. Wie het los wil hosten, zet er `<!doctype html><meta charset="utf-8">` boven.

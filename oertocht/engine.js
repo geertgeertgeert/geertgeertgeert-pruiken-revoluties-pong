@@ -2051,6 +2051,7 @@
     let cost = 3;
     if (fast) cost = 2;
     if (slow) cost = 5;
+    G.pace = fast ? 'snel' : slow ? 'rustig' : 'gewoon';
     cost += detour || 0;
     const leg = [sc.exitText];
     if (fast) leg.push('Ze lopen snel. Sela en Tiko hebben moeite om bij te blijven.');
@@ -2250,6 +2251,26 @@
     return G;
   }
 
+  // Wat er op het tafereel te zien is. Alleen lezen, nooit iets veranderen.
+  function scenery(G) {
+    const ss = G.ss || {};
+    const v = {
+      scene: G.sceneId, part: PARTS[G.t % 3], fire: G.fire, torch: G.torch >= 0, over: G.over ? G.over.type : null,
+      hp: Object.assign({}, G.hp), sick: G.sick.slice(), tired: !!G.tired,
+      next: SCENE_ORDER[G.sceneIdx + 1] ? SCENES[SCENE_ORDER[G.sceneIdx + 1]].place : null,
+      pace: G.pace || 'gewoon',
+    };
+    if (G.sceneId === 'rook') Object.assign(v, { known: !!ss.known, fireNear: ss.fireNear || 0, passed: !!ss.passed, drift: ss.drift || 0 });
+    if (G.sceneId === 'spoor') Object.assign(v, { deer: !!(ss.found && !ss.gone && !ss.hunted), hunted: !!ss.hunted, gone: !!ss.gone, downwind: !!ss.downwind, bron: !!ss.bron });
+    if (G.sceneId === 'rivier') Object.assign(v, { pos: Object.assign({}, ss.pos), kano: ss.kano, kanoFound: !!ss.kanoFound, ford: !!ss.ford });
+    if (G.sceneId === 'nacht') {
+      Object.assign(v, { campfire: !!ss.campfire, shelter: !!ss.shelter, morning: !!ss.morning, left: ss.left, watch: (ss.watch || []).slice(), meatHigh: !!ss.meatHigh });
+      if (!ss.morning) v.part = ss.left <= 1 ? 'nacht' : 'avond';
+    }
+    if (G.sceneId === 'kust') Object.assign(v, { parts: G.over && G.over.parts ? Object.assign({}, G.over.parts) : null });
+    return v;
+  }
+
   function status(G) {
     return {
       day: day(G), part: part(G), deadline: DEADLINE_DAY, food: G.food, water: G.water, fire: G.fire, torch: G.torch >= 0,
@@ -2282,7 +2303,7 @@
 
   return {
     PARTY, PEOPLE, SCENES, SCENE_ORDER, DEADLINE_DAY, MAX_HP,
-    newGame, startAt, turn, parse, status, restartScene, report,
+    newGame, startAt, turn, parse, status, scenery, restartScene, report,
     _internal: { tokenize, fold },
   };
 });
